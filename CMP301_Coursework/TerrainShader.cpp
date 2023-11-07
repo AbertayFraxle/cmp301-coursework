@@ -84,7 +84,7 @@ void TerrainShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 }
 
 
-void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* heightmap, Light* light1, Light* light2, Light* light3)
+void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* heightmap, Light* light1, Light* light2, Light* light3)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -131,7 +131,8 @@ void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
 
 	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &texture);
+	deviceContext->PSSetShaderResources(0, 1, &lowTex);
+	deviceContext->PSSetShaderResources(1, 1, &highTex);
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
 
 	deviceContext->VSSetShaderResources(0, 1, &heightmap);

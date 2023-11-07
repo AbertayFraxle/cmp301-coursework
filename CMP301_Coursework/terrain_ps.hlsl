@@ -4,6 +4,7 @@
 #define LIGHTCOUNT 3
 
 Texture2D texture0 : register(t0);
+Texture2D texture1 : register(t1);
 SamplerState sampler0 : register(s0);
 
 cbuffer LightBuffer : register(b0)
@@ -33,8 +34,20 @@ float4 calculateLighting(float3 lightDirection, float3 normal, float4 ldiffuse)
 
 float4 main(InputType input) : SV_TARGET
 {
+    
+    float4 textureColour;
 	// Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
-    float4 textureColour = texture0.Sample(sampler0, input.tex);
+    if (input.worldPosition.y< 8)
+    {
+        textureColour = texture0.Sample(sampler0, input.tex);
+
+    }
+    else 
+    {
+        textureColour = texture1.Sample(sampler0, input.tex);
+    }
+
+    
     float3 lightVector[LIGHTCOUNT];
     float4 lightColour;
 

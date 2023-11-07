@@ -32,7 +32,7 @@ OutputType main(InputType input)
 	output.position = mul(output.position, projectionMatrix);
 
 	// Store the texture coordinates for the pixel shader.
-	output.tex = input.tex;
+	output.tex = input.tex*10;
 
 	// Calculate the normal vector against the world matrix only and normalise.
 	output.normal = mul(input.normal, (float3x3)worldMatrix);

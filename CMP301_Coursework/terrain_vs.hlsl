@@ -34,8 +34,7 @@ OutputType main(InputType input)
 
     float4 sample = heightMap.SampleLevel(sampler0, input.tex, 0);
 
-    input.position.y = (sample.x + sample.y + sample.z) * 5;
-
+    input.position.y = (sample.x + sample.y + sample.z) * 7.5f;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
@@ -43,7 +42,7 @@ OutputType main(InputType input)
     output.position = mul(output.position, projectionMatrix);
 
 	// Store the texture coordinates for the pixel shader.
-    output.tex = input.tex;
+    output.tex = input.tex*20;
 
 	// Calculate the normal vector against the world matrix only and normalise.
     output.normal = mul(input.normal, (float3x3) worldMatrix);

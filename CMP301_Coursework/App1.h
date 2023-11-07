@@ -23,9 +23,12 @@ protected:
 	void gui();
 
 private:
-	//LightShader* shader;
-	PlaneMesh* mesh;
-	TerrainShader* shader;
+	
+	PlaneMesh* terrain;
+	PlaneMesh* water;
+
+	TerrainShader* terrainShader;
+	LightShader* lightShader;
 
 	Light* light1;
 	Light* light2;

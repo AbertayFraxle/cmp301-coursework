@@ -3,8 +3,9 @@
 
 App1::App1()
 {
-	mesh = nullptr;
-	shader = nullptr;
+	terrain = nullptr;
+	lightShader = nullptr;
+	terrainShader = nullptr;
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -13,11 +14,14 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
 	// Create Mesh object and shader object
-	mesh = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
-	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
-	textureMgr->loadTexture(L"terrainHeight", L"res/height.png");
-	//shader = new LightShader(renderer->getDevice(), hwnd);
-	shader = new TerrainShader(renderer->getDevice(), hwnd);
+	terrain = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
+	water = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
+	textureMgr->loadTexture(L"sand", L"res/sand.png");
+	textureMgr->loadTexture(L"terrainHeight", L"res/heightmap.png");
+	textureMgr->loadTexture(L"water", L"res/water.jpg");
+	textureMgr->loadTexture(L"grass", L"res/grass.png");
+	lightShader = new LightShader(renderer->getDevice(), hwnd);
+	terrainShader = new TerrainShader(renderer->getDevice(), hwnd);
 
 
 	// Configure point light.
@@ -33,9 +37,9 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	//
 	light3 = new Light();
-	light3->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
-	light3->setDiffuseColour(0.0f, 0.2f, 0.0f, 1.0f);
-	light3->setDirection(0.f, -1.f, 0.f);
+	light3->setAmbientColour(0.2f, 0.2f, 0.2f, 1.0f);
+	light3->setDiffuseColour(0.5f, 0.5f, 0.5f, 1.0f);
+	light3->setDirection(1.f, -1.f, 0.f);
 
 }
 
@@ -46,16 +50,28 @@ App1::~App1()
 	BaseApplication::~BaseApplication();
 
 	// Release the Direct3D object.
-	if (mesh)
+	if (terrain)
 	{
-		delete mesh;
-		mesh = 0;
+		delete terrain;
+		terrain = 0;
 	}
 
-	if (shader)
+	if (water)
 	{
-		delete shader;
-		shader = 0;
+		delete water;
+		water = 0;
+	}
+
+	if (lightShader)
+	{
+		delete lightShader;
+		lightShader = 0;
+	}
+
+	if (terrainShader)
+	{
+		delete terrainShader;
+		terrainShader = 0;
 	}
 }
 
@@ -96,9 +112,16 @@ bool App1::render()
 	projectionMatrix = renderer->getProjectionMatrix();
 
 	// Send geometry data, set shader parameters, render object with shader
-	mesh->sendData(renderer->getDeviceContext());
-	shader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"),textureMgr->getTexture(L"terrainHeight") ,light1,light2,light3);
-	shader->render(renderer->getDeviceContext(), mesh->getIndexCount());
+	terrain->sendData(renderer->getDeviceContext());
+	terrainShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"grass"),textureMgr->getTexture(L"terrainHeight") ,light1,light2,light3);
+	terrainShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
+
+	worldMatrix = worldMatrix * XMMatrixScaling(8, 8, 8);
+	worldMatrix = worldMatrix + XMMatrixTranslation(-400, 2, -400);
+
+	water->sendData(renderer->getDeviceContext());
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"),light1, light2, light3);
+	lightShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	// Render GUI
 	gui();
