@@ -13,6 +13,12 @@
     <FxCompile Include="terrain_vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="water_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="water_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -27,6 +33,9 @@
     <ClCompile Include="TerrainShader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="WaterShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -36,6 +45,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="TerrainShader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterShader.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

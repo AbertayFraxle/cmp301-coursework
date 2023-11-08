@@ -1,12 +1,12 @@
-#include "LightShader.h"
+#include "WaterShader.h"
 
-LightShader::LightShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+WaterShader::WaterShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"light_vs.cso", L"light_ps.cso");
+	initShader(L"terrain_vs.cso", L"terrain_ps.cso");
 }
 
 
-LightShader::~LightShader()
+WaterShader::~WaterShader()
 {
 	// Release the sampler state.
 	if (sampleState)
@@ -40,7 +40,7 @@ LightShader::~LightShader()
 	BaseShader::~BaseShader();
 }
 
-void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
+void WaterShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -81,17 +81,16 @@ void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	lightBufferDesc.MiscFlags = 0;
 	lightBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
-
-
 }
 
 
-void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, Light* light1, Light* light2,Light* light3)
+void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* heightmap, Light* light1, Light* light2, Light* light3)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
-	
+
+
 	XMMATRIX tworld, tview, tproj;
 
 
@@ -106,10 +105,7 @@ void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	dataPtr->projection = tproj;
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
-	deviceContext->PSSetConstantBuffers(1, 1, &matrixBuffer);
 
-	//Additional
-	// Send light data to pixel shader
 	LightBufferType* lightPtr;
 	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	lightPtr = (LightBufferType*)mappedResource.pData;
@@ -121,20 +117,24 @@ void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 
 	lightPtr->ambient[1] = light2->getAmbientColour();
 	lightPtr->diffuse[1] = light2->getDiffuseColour();
-	lightPtr->position[1] = XMFLOAT4(light2->getPosition().x, light2->getPosition().y, light2->getPosition().z,0);
+	lightPtr->position[1] = XMFLOAT4(light2->getPosition().x, light2->getPosition().y, light2->getPosition().z, 0);
 	lightPtr->direction[1] = XMFLOAT4(0, 0, 0, 0);
 	lightPtr->factors[1] = XMFLOAT4(0.5, 0.125, 0, 0);
 
 	lightPtr->ambient[2] = light3->getAmbientColour();
 	lightPtr->diffuse[2] = light3->getDiffuseColour();
 	lightPtr->position[2] = XMFLOAT4(0, 0, 0, 0);
-	lightPtr->direction[2] = XMFLOAT4(light3->getDirection().x, light3->getDirection().y, light3->getDirection().z,0);
+	lightPtr->direction[2] = XMFLOAT4(light3->getDirection().x, light3->getDirection().y, light3->getDirection().z, 0);
 	lightPtr->factors[2] = XMFLOAT4(0, 0, 0, 0);
 
 	deviceContext->Unmap(lightBuffer, 0);
 	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
 
 	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &texture);
+	deviceContext->PSSetShaderResources(0, 1, &lowTex);
+	deviceContext->PSSetShaderResources(1, 1, &highTex);
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
+
+	deviceContext->VSSetShaderResources(0, 1, &heightmap);
+	deviceContext->VSSetSamplers(0, 1, &sampleState);
 }

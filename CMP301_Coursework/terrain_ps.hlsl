@@ -2,6 +2,8 @@
 // Calculate diffuse lighting for a single directional light (also texturing)
 
 #define LIGHTCOUNT 3
+#define TEXTURECHANGE 8
+#define BLENDREGION 2
 
 Texture2D texture0 : register(t0);
 Texture2D texture1 : register(t1);
@@ -36,15 +38,30 @@ float4 main(InputType input) : SV_TARGET
 {
     
     float4 textureColour;
-	// Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
-    if (input.worldPosition.y< 8)
-    {
-        textureColour = texture0.Sample(sampler0, input.tex);
+    float diff = abs(input.worldPosition.y - TEXTURECHANGE);
 
+
+	// Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
+    if (input.worldPosition.y< TEXTURECHANGE)
+    {
+        if (diff < BLENDREGION) {
+
+            float bias1 = diff / BLENDREGION;
+            float bias2 = 1 - bias1;
+
+            textureColour = (texture0.Sample(sampler0, input.tex)*bias1) + (texture1.Sample(sampler0, input.tex)*bias2);
+
+        }
+        else {
+
+            textureColour = texture0.Sample(sampler0, input.tex);
+        }
     }
     else 
     {
-        textureColour = texture1.Sample(sampler0, input.tex);
+       
+       textureColour = texture1.Sample(sampler0, input.tex);
+  
     }
 
     

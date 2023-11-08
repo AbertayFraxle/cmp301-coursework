@@ -33,7 +33,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	light2 = new Light();
 	light2->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	light2->setDiffuseColour(0.0f, 0.0f, 1.0f, 1.0f);
-	light2->setPosition(20.0f, 10.0f, 50.0f);
+	light2->setPosition(0.0f, 10.0f, 50.0f);
 
 	//
 	light3 = new Light();
@@ -116,11 +116,8 @@ bool App1::render()
 	terrainShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"grass"),textureMgr->getTexture(L"terrainHeight") ,light1,light2,light3);
 	terrainShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
 
-	worldMatrix = worldMatrix * XMMatrixScaling(8, 8, 8);
-	worldMatrix = worldMatrix + XMMatrixTranslation(-400, 2, -400);
-
 	water->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"),light1, light2, light3);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(8, 8, 8))+ XMMatrixTranslation(-400, 2, -400), viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"),light1, light2, light3);
 	lightShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	// Render GUI
