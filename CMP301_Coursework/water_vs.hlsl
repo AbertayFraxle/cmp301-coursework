@@ -1,9 +1,9 @@
 // Light vertex shader
 // Standard issue vertex shader, apply matrices, pass info to pixel shader
 
-#define WAVESCALE 0.1
-#define TIMESCALE 0.5
-#define TILING 20
+#define WAVESCALE 0.25
+#define TIMESCALE 0.1
+#define TILING 8
 #define STEPAMOUNT 0.1
 
 Texture2D heightMap0 : register(t0);
@@ -43,7 +43,7 @@ OutputType main(InputType input)
     OutputType output;
 
     float2 tex0 = input.tex * TILING + float2(time * TIMESCALE, -time * TIMESCALE);
-    float2 tex1 = input.tex * TILING + float2(time * TIMESCALE * 0.5f, -time * TIMESCALE * 0.5f);
+    float2 tex1 = input.tex * TILING + float2(-time * TIMESCALE , -time * TIMESCALE);
     
     float4 sample0 = heightMap0.SampleLevel(sampler0, tex0, 0) * WAVESCALE;
     float4 sample1 = heightMap1.SampleLevel(sampler0, tex1, 0) * WAVESCALE;
