@@ -6,6 +6,7 @@
 #include "DXF.h"	// include dxframework
 #include "LightShader.h"
 #include "TerrainShader.h"
+#include "WaterShader.h"
 
 
 class App1 : public BaseApplication
@@ -29,10 +30,13 @@ private:
 
 	TerrainShader* terrainShader;
 	LightShader* lightShader;
+	WaterShader* waterShader;
 
 	Light* light1;
 	Light* light2;
 	Light* light3;
+
+	float elapsedTime;
 };
 
 #endif

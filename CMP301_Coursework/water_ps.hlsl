@@ -2,11 +2,8 @@
 // Calculate diffuse lighting for a single directional light (also texturing)
 
 #define LIGHTCOUNT 3
-#define TEXTURECHANGE 8
-#define BLENDREGION 4
 
 Texture2D texture0 : register(t0);
-Texture2D texture1 : register(t1);
 SamplerState sampler0 : register(s0);
 
 cbuffer LightBuffer : register(b0)
@@ -17,6 +14,14 @@ cbuffer LightBuffer : register(b0)
     float4 direction[LIGHTCOUNT];
     float4 factors[LIGHTCOUNT];
 };
+
+cbuffer MatrixBuffer : register(b1)
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
 
 struct InputType
 {
@@ -37,49 +42,27 @@ float4 calculateLighting(float3 lightDirection, float3 normal, float4 ldiffuse)
 float4 main(InputType input) : SV_TARGET
 {
 
-    float4 textureColour;
-    float diff = abs(input.worldPosition.y - TEXTURECHANGE);
-
-
-    // Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
-    if (input.worldPosition.y < TEXTURECHANGE)
-    {
-        if (diff < BLENDREGION) {
-
-            float bias1 = diff / BLENDREGION;
-            float bias2 = 1 - bias1;
-
-            textureColour = (texture0.Sample(sampler0, input.tex) * bias1) + (texture1.Sample(sampler0, input.tex) * bias2);
-
-        }
-        else {
-
-            textureColour = texture0.Sample(sampler0, input.tex);
-        }
-    }
-    else
-    {
-
-       textureColour = texture1.Sample(sampler0, input.tex);
-
-    }
-
-
+	// Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
+    float4 textureColour = texture0.Sample(sampler0, input.tex);
     float3 lightVector[LIGHTCOUNT];
     float4 lightColour;
 
-    //loop for all the lights in the scene
+	//loop for all the lights in the scene
     for (int i = 0; i < LIGHTCOUNT; i++)
     {
 
-        //check if there's a direction, for this week, the only light with a direction will be the directional light
+		//check if there's a direction, for this week, the only light with a direction will be the directional light
         if (length(direction[i]) <= 0)
         {
+            float3 rPosition = position[i].xyz;
+            rPosition = mul(rPosition, worldMatrix);
+
+
             //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
-            lightVector[i] = normalize(position[i].xyz - input.worldPosition);
+            lightVector[i] = normalize(rPosition - input.worldPosition);
 
             //get the distance of the lit point to the light source
-            float dist = length(position[i].xyz - input.worldPosition);
+            float dist = length(rPosition - input.worldPosition);
 
             //calculate the attenuation
             float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));
@@ -94,10 +77,10 @@ float4 main(InputType input) : SV_TARGET
             lightColour += saturate(diffuse[i] * intensity);
         }
     }
-
+	
     //saturate the light Colour
     lightColour = saturate(lightColour);
-
+    
     //add all the ambient light values to the light colour
     for (int i = 0; i < LIGHTCOUNT; i++)
     {

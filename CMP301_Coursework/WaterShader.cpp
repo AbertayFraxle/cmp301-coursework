@@ -2,7 +2,7 @@
 
 WaterShader::WaterShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"terrain_vs.cso", L"terrain_ps.cso");
+	initShader(L"water_vs.cso", L"water_ps.cso");
 }
 
 
@@ -45,6 +45,7 @@ void WaterShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
+	D3D11_BUFFER_DESC timeBufferDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
@@ -81,10 +82,19 @@ void WaterShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	lightBufferDesc.MiscFlags = 0;
 	lightBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
+
+	timeBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	timeBufferDesc.ByteWidth = sizeof(TimeBufferType);
+	timeBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	timeBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	timeBufferDesc.MiscFlags = 0;
+	timeBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&timeBufferDesc, NULL, &timeBuffer);
+
 }
 
 
-void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* heightmap, Light* light1, Light* light2, Light* light3)
+void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, Light* light1, Light* light2, Light* light3, float time)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -127,14 +137,22 @@ void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	lightPtr->direction[2] = XMFLOAT4(light3->getDirection().x, light3->getDirection().y, light3->getDirection().z, 0);
 	lightPtr->factors[2] = XMFLOAT4(0, 0, 0, 0);
 
+	TimeBufferType* timePtr;
+	deviceContext->Map(timeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	timePtr = (TimeBufferType*)mappedResource.pData;
+	timePtr->time = time;
+	timePtr->padding = XMFLOAT3(0,0,0);
+	deviceContext->Unmap(timeBuffer, 0);
+	deviceContext->VSSetConstantBuffers(1, 1, &timeBuffer);
+
 	deviceContext->Unmap(lightBuffer, 0);
 	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
 
 	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &lowTex);
-	deviceContext->PSSetShaderResources(1, 1, &highTex);
+	deviceContext->PSSetShaderResources(0, 1, &waterTex);
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
 
-	deviceContext->VSSetShaderResources(0, 1, &heightmap);
+	deviceContext->VSSetShaderResources(0, 1, &heightmap1);
+	deviceContext->VSSetShaderResources(1, 1, &heightmap2);
 	deviceContext->VSSetSamplers(0, 1, &sampleState);
 }

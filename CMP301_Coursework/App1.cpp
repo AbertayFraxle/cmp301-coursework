@@ -20,8 +20,11 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	textureMgr->loadTexture(L"terrainHeight", L"res/heightmap.png");
 	textureMgr->loadTexture(L"water", L"res/water.jpg");
 	textureMgr->loadTexture(L"grass", L"res/grass.png");
+	textureMgr->loadTexture(L"waterMap1", L"res/waterheightmap/0.png");
+	textureMgr->loadTexture(L"waterMap2", L"res/waterheightmap/1.png");
 	lightShader = new LightShader(renderer->getDevice(), hwnd);
 	terrainShader = new TerrainShader(renderer->getDevice(), hwnd);
+	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 
 
 	// Configure point light.
@@ -87,7 +90,9 @@ bool App1::frame()
 	}
 	
 	// Render the graphics.
+	elapsedTime += timer->getTime();
 	result = render();
+
 	if (!result)
 	{
 		return false;
@@ -106,6 +111,7 @@ bool App1::render()
 	// Generate the view matrix based on the camera's position.
 	camera->update();
 
+
 	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
 	worldMatrix = renderer->getWorldMatrix();
 	viewMatrix = camera->getViewMatrix();
@@ -117,8 +123,8 @@ bool App1::render()
 	terrainShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
 
 	water->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(8, 8, 8))+ XMMatrixTranslation(-400, 2, -400), viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"),light1, light2, light3);
-	lightShader->render(renderer->getDeviceContext(), water->getIndexCount());
+	waterShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(8, 8, 8)) + XMMatrixTranslation(-400, 2, -400), viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"), light1, light2, light3, elapsedTime);
+	waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	// Render GUI
 	gui();
