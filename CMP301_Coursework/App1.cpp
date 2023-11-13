@@ -18,7 +18,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	water = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
 	textureMgr->loadTexture(L"sand", L"res/sand.png");
 	textureMgr->loadTexture(L"terrainHeight", L"res/heightmap.png");
-	textureMgr->loadTexture(L"water", L"res/water.jpg");
+	textureMgr->loadTexture(L"water", L"res/water2.jpg");
 	textureMgr->loadTexture(L"grass", L"res/grass.png");
 	textureMgr->loadTexture(L"waterMap1", L"res/waterheightmap/0.png");
 	textureMgr->loadTexture(L"waterMap2", L"res/waterheightmap/1.png");
@@ -42,7 +42,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	light3 = new Light();
 	light3->setAmbientColour(0.2f, 0.2f, 0.2f, 1.0f);
 	light3->setDiffuseColour(0.5f, 0.5f, 0.5f, 1.0f);
-	light3->setDirection(1.f, -1.f, 0.f);
+	light3->setDirection(0.f, -1.f, 0.f);
 
 }
 

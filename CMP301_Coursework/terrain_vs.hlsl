@@ -1,5 +1,7 @@
 // Light vertex shader
 // Standard issue vertex shader, apply matrices, pass info to pixel shader
+#define STEPAMOUNT 0.01f
+
 
 Texture2D heightMap : register(t0);
 SamplerState sampler0 : register(s0);
@@ -30,9 +32,29 @@ struct OutputType
 OutputType main(InputType input)
 {
     OutputType output;
-	
+    
+    float2 offsets[4];
+    offsets[0] = input.tex + float2(-STEPAMOUNT, 0);
+    offsets[1] = input.tex + float2(STEPAMOUNT, 0);
+    offsets[2] = input.tex + float2(0, -STEPAMOUNT);
+    offsets[3] = input.tex + float2(0, STEPAMOUNT);
+    
+    float heights[4];
+    
+    for (int i = 0; i < 4; i++)
+    {
+        heights[i] = heightMap.SampleLevel(sampler0, offsets[i], 0).x;
+    }
 
+    float2 step = float2(STEPAMOUNT, 0.f);
+    
+    float3 va = normalize(float3(step.xy, heights[1] - heights[0]));
+    float3 vb = normalize(float3(step.yx, heights[3] - heights[2]));
+
+    output.normal = cross(va,vb).xzy;
+    
     float4 sample = heightMap.SampleLevel(sampler0, input.tex, 0);
+    
 
     input.position.y = (sample.x + sample.y + sample.z) * 7.5f;
 
@@ -45,8 +67,11 @@ OutputType main(InputType input)
     output.tex = input.tex*20;
 
 	// Calculate the normal vector against the world matrix only and normalise.
-    output.normal = mul(input.normal, (float3x3) worldMatrix);
+    output.normal = mul(output.normal, (float3x3) worldMatrix);
     output.normal = normalize(output.normal);
+    
+    
+    
     
     output.worldPosition = mul(input.position, worldMatrix).xyz;
 
