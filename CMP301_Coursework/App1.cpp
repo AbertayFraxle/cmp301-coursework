@@ -14,8 +14,10 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
 	// Create Mesh object and shader object
-	terrain = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
-	water = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
+	terrain = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext(),1000);
+	water = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext(),2400);
+	//water = new TessellationPlane(renderer->getDevice(), renderer->getDeviceContext(), 100, 100);
+
 	textureMgr->loadTexture(L"sand", L"res/sand.png");
 	textureMgr->loadTexture(L"terrainHeight", L"res/heightmap.png");
 	textureMgr->loadTexture(L"water", L"res/water2.jpg");
@@ -31,14 +33,14 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	light1 = new Light();
 	light1->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	light1->setDiffuseColour(1.0f, 0.0f, 0.0f, 1.0f);
-	light1->setPosition(70.0f, 10.0f, 50.0f);
+	light1->setPosition(40.0f, 7.5f, 40.0f);
 
 	light2 = new Light();
 	light2->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	light2->setDiffuseColour(0.0f, 0.0f, 1.0f, 1.0f);
-	light2->setPosition(0.0f, 10.0f, 50.0f);
+	light2->setPosition(0.0f, 10000.0f, 00.0f);
 
-	//
+	//directional light
 	light3 = new Light();
 	light3->setAmbientColour(0.2f, 0.2f, 0.2f, 1.0f);
 	light3->setDiffuseColour(0.5f, 0.5f, 0.5f, 1.0f);
@@ -103,6 +105,13 @@ bool App1::frame()
 
 bool App1::render()
 {
+	firstPass();
+
+	return true;
+}
+
+void App1::firstPass()
+{
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 
 	// Clear the scene. (default blue colour)
@@ -117,13 +126,14 @@ bool App1::render()
 	viewMatrix = camera->getViewMatrix();
 	projectionMatrix = renderer->getProjectionMatrix();
 
-	// Send geometry data, set shader parameters, render object with shader
+	//render the terrain using the terrain shader I created
 	terrain->sendData(renderer->getDeviceContext());
-	terrainShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"grass"),textureMgr->getTexture(L"terrainHeight") ,light1,light2,light3);
+	terrainShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixScaling(0.1f, 1.f, 0.1f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"grass"), textureMgr->getTexture(L"terrainHeight"), light1, light2, light3);
 	terrainShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
 
+	//render the water using the water shader I created
 	water->sendData(renderer->getDeviceContext());
-	waterShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(8, 8, 8)) + XMMatrixTranslation(-400, 2, -400), viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"), light1, light2, light3, elapsedTime);
+	waterShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(0.25f, 1.f, 0.25f)) + XMMatrixTranslation(-400, 2, -400), viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"), light1, light2, light3, elapsedTime);
 	waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	// Render GUI
@@ -132,7 +142,10 @@ bool App1::render()
 	// Swap the buffers
 	renderer->endScene();
 
-	return true;
+}
+
+void App1::finalPass()
+{
 }
 
 void App1::gui()

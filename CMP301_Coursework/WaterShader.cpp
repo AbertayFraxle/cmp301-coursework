@@ -115,6 +115,7 @@ void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	dataPtr->projection = tproj;
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+	deviceContext->PSSetConstantBuffers(0, 1, &matrixBuffer);
 
 	LightBufferType* lightPtr;
 	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

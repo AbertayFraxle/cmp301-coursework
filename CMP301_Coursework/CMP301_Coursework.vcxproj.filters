@@ -36,6 +36,9 @@
     <ClCompile Include="WaterShader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="TesselationPlane.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -48,6 +51,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="WaterShader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="TesselationPlane.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

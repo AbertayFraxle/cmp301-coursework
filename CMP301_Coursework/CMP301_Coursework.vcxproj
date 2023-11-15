@@ -167,6 +167,7 @@
     <ClCompile Include="LightShader.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TerrainShader.cpp" />
+    <ClCompile Include="TesselationPlane.cpp" />
     <ClCompile Include="WaterShader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +205,7 @@
     <ClInclude Include="App1.h" />
     <ClInclude Include="LightShader.h" />
     <ClInclude Include="TerrainShader.h" />
+    <ClInclude Include="TesselationPlane.h" />
     <ClInclude Include="WaterShader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

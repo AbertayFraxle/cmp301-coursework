@@ -1,9 +1,9 @@
 // Light vertex shader
 // Standard issue vertex shader, apply matrices, pass info to pixel shader
 
-#define WAVESCALE 0.25
-#define TIMESCALE 0.1
-#define TILING 8
+#define WAVESCALE 1
+#define TIMESCALE 0.025
+#define TILING 64
 #define STEPAMOUNT 0.1
 
 Texture2D heightMap0 : register(t0);

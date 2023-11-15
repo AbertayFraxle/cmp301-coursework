@@ -7,6 +7,7 @@
 #include "LightShader.h"
 #include "TerrainShader.h"
 #include "WaterShader.h"
+#include "TesselationPlane.h"
 
 
 class App1 : public BaseApplication
@@ -20,13 +21,20 @@ public:
 	bool frame();
 
 protected:
+
+
 	bool render();
+
+	void firstPass();
+	void finalPass();
+	
 	void gui();
 
 private:
 	
 	PlaneMesh* terrain;
 	PlaneMesh* water;
+	//TessellationPlane* water;
 
 	TerrainShader* terrainShader;
 	LightShader* lightShader;

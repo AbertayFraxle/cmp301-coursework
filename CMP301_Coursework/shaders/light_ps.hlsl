@@ -45,7 +45,7 @@ float4 main(InputType input) : SV_TARGET
 	// Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
 	float4 textureColour = texture0.Sample(sampler0, input.tex);
     float3 lightVector[LIGHTCOUNT];
-    float4 lightColour;
+    float4 lightColour = float4(0, 0, 0, 0);
 
 	//loop for all the lights in the scene
     for (int i = 0; i < LIGHTCOUNT; i++)
@@ -56,7 +56,7 @@ float4 main(InputType input) : SV_TARGET
         {
             float3 rPosition = position[i].xyz;
             rPosition = mul(rPosition, worldMatrix);
-
+            
 
             //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
             lightVector[i] = normalize(rPosition - input.worldPosition);

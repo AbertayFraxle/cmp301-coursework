@@ -55,7 +55,7 @@ float4 main(InputType input) : SV_TARGET
         if (length(direction[i]) <= 0)
         {
             float3 rPosition = position[i].xyz;
-            rPosition = mul(rPosition, worldMatrix);
+            //rPosition = mul(rPosition, viewMatrix).xyz;
 
 
             //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
