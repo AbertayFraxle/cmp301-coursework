@@ -13,7 +13,7 @@ cbuffer LightBuffer : register(b0)
 {
     float4 ambient[LIGHTCOUNT];
     float4 diffuse[LIGHTCOUNT];
-    float4 position[LIGHTCOUNT];
+    float4 lightPosition[LIGHTCOUNT];
     float4 direction[LIGHTCOUNT];
     float4 factors[LIGHTCOUNT];
 };
@@ -79,16 +79,16 @@ float4 main(InputType input) : SV_TARGET
 	//loop for all the lights in the scene
     for (int i = 0; i < LIGHTCOUNT; i++)
     {
-        float3 rPosition = position[i].xyz;
+       
        // rPosition = mul(rPosition, viewMatrix).xyz;
 		//check if there's a direction, for this week, the only light with a direction will be the directional light
         if (length(direction[i]) <= 0)
         {
             //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
-            lightVector[i] = normalize(rPosition - input.worldPosition);
+            lightVector[i] = normalize(lightPosition[i].xyz - input.worldPosition);
 
             //get the distance of the lit point to the light source
-            float dist = length(rPosition - input.worldPosition);
+            float dist = length(lightPosition[i].xyz - input.worldPosition);
 
             //calculate the attenuation
             float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));

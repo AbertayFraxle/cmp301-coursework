@@ -137,6 +137,9 @@ void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	lightPtr->position[2] = XMFLOAT4(0, 0, 0, 0);
 	lightPtr->direction[2] = XMFLOAT4(light3->getDirection().x, light3->getDirection().y, light3->getDirection().z, 0);
 	lightPtr->factors[2] = XMFLOAT4(0, 0, 0, 0);
+	deviceContext->Unmap(lightBuffer, 0);
+	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
+
 
 	TimeBufferType* timePtr;
 	deviceContext->Map(timeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -145,9 +148,6 @@ void WaterShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	timePtr->padding = XMFLOAT3(0,0,0);
 	deviceContext->Unmap(timeBuffer, 0);
 	deviceContext->VSSetConstantBuffers(1, 1, &timeBuffer);
-
-	deviceContext->Unmap(lightBuffer, 0);
-	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
 
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &waterTex);

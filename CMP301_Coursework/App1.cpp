@@ -37,13 +37,13 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	light2 = new Light();
 	light2->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
-	light2->setDiffuseColour(0.0f, 0.0f, 1.0f, 1.0f);
-	light2->setPosition(0.0f, 10000.0f, 00.0f);
+	light2->setDiffuseColour(1.0f, 0.5f, 0.0f, 1.0f);
+	light2->setPosition(debuglightPos[0], debuglightPos[1], debuglightPos[2]);
 
 	//directional light
 	light3 = new Light();
-	light3->setAmbientColour(0.2f, 0.2f, 0.2f, 1.0f);
-	light3->setDiffuseColour(0.5f, 0.5f, 0.5f, 1.0f);
+	light3->setAmbientColour(0.05f, 0.05f, 0.05f, 1.0f);
+	light3->setDiffuseColour(0.3f, 0.3f, 0.3f, 1.0f);
 	light3->setDirection(0.f, -1.f, 0.f);
 
 }
@@ -93,6 +93,7 @@ bool App1::frame()
 	
 	// Render the graphics.
 	elapsedTime += timer->getTime();
+	light2->setPosition(debuglightPos[0], debuglightPos[1], debuglightPos[2]);
 	result = render();
 
 	if (!result)
@@ -115,7 +116,7 @@ void App1::firstPass()
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 
 	// Clear the scene. (default blue colour)
-	renderer->beginScene(0.39f, 0.58f, 0.92f, 1.0f);
+	renderer->beginScene(0.f, 0.f, 0.f, 1.0f);
 
 	// Generate the view matrix based on the camera's position.
 	camera->update();
@@ -133,7 +134,7 @@ void App1::firstPass()
 
 	//render the water using the water shader I created
 	water->sendData(renderer->getDeviceContext());
-	waterShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(0.25f, 1.f, 0.25f)) + XMMatrixTranslation(-400, 2, -400), viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"), light1, light2, light3, elapsedTime);
+	waterShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix*XMMatrixScaling(0.25f, 1.f, 0.25f))* XMMatrixTranslation(-400,0,-400), viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"), light1, light2, light3, elapsedTime);
 	waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	// Render GUI
@@ -159,6 +160,8 @@ void App1::gui()
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 	ImGui::Text("Press E to raise camera \nto see the plane being rendered");
+
+	ImGui::SliderFloat3("DEBUG LIGHT POS", debuglightPos, 0, 100);
 
 	// Render UI
 	ImGui::Render();

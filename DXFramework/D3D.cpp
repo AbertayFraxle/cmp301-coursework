@@ -43,7 +43,7 @@ void D3D::createDevice()
 	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0 };
 	UINT creationFlags = NULL;
 //#if defined(_DEBUG)
-//	creationFlags = D3D11_CREATE_DEVICE_DEBUG;
+	creationFlags = D3D11_CREATE_DEVICE_DEBUG;
 //#endif
 
 	// Create a list of every GFX adapter available

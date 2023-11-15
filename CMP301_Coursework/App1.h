@@ -44,6 +44,8 @@ private:
 	Light* light2;
 	Light* light3;
 
+	float debuglightPos[3];
+
 	float elapsedTime;
 };
 

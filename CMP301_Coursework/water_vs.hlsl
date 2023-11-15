@@ -3,7 +3,7 @@
 
 #define WAVESCALE 1
 #define TIMESCALE 0.025
-#define TILING 64
+#define TILING 32
 #define STEPAMOUNT 0.1
 
 Texture2D heightMap0 : register(t0);
