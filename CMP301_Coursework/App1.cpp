@@ -33,17 +33,18 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 	depthShader = new DepthShader(renderer->getDevice(), hwnd);
 	textureShader = new TextureShader(renderer->getDevice(), hwnd);
+	terrainDepthShader = new TerrainDepthShader(renderer->getDevice(), hwnd);
 
 	// Variables for defining shadow map
 	int shadowmapWidth = 2048;
 	int shadowmapHeight = 2048;
-	int sceneWidth = 100;
-	int sceneHeight = 100;
+	int sceneWidth = 200;
+	int sceneHeight = 200;
 
 	// This is your shadow map
+
 	shadowMap = new ShadowMap(renderer->getDevice(), shadowmapWidth, shadowmapHeight);
 	
-
 
 	// Configure point light.
 	light1 = new Light();
@@ -60,8 +61,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	light3 = new Light();
 	light3->setAmbientColour(0.05f, 0.05f, 0.05f, 1.0f);
 	light3->setDiffuseColour(0.3f, 0.3f, 0.3f, 1.0f);
-	light3->setDirection(-0.5f, -1.f, 0.f);
-	light3->setPosition(50.f,30.f,50.f);
+	light3->setDirection(1.f, -1.f, 1.f);
+	light3->setPosition(0.f,30.f,0.f);
 
 	light3->generateOrthoMatrix(sceneWidth,sceneHeight,0.1,200);
 
@@ -142,11 +143,11 @@ void App1::depthPass()
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 	
 	terrain->sendData(renderer->getDeviceContext());
-	depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixScaling(0.1f, 1.f, 0.1f), lightViewMatrix, lightProjectionMatrix);
-	depthShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
+	terrainDepthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixScaling(0.1f, 1.f, 0.1f), lightViewMatrix, lightProjectionMatrix, textureMgr->getTexture(L"terrainHeight"));
+	terrainDepthShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
 
 	cube->sendData(renderer->getDeviceContext());
-	depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f,20.f,50.f), lightViewMatrix, lightProjectionMatrix);
+	depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f,12.5f,50.f), lightViewMatrix, lightProjectionMatrix);
 	depthShader->render(renderer->getDeviceContext(), cube->getIndexCount());
 
 	renderer->setBackBufferRenderTarget();
@@ -180,7 +181,7 @@ void App1::firstPass()
 	waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	cube->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 20.f, 50.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), light1, light2, light3);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 12.5f, 50.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), light1, light2, light3);
 	lightShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	playerView->sendData(renderer->getDeviceContext());

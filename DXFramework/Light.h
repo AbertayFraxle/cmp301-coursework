@@ -30,7 +30,8 @@ public:
 		_mm_free(p);
 	}
 
-	void generateViewMatrix();			///< Generates and upto date view matrix, based on current rotation
+	void generateViewMatrix();	
+	void generateViewMatrix(int index);///< Generates and upto date view matrix, based on current rotation
 	void generateProjectionMatrix(float screenNear, float screenFar);			///< Generate project matrix based on current rotation and provided near & far plane
 	void generateOrthoMatrix(float screenWidth, float screenHeight, float near, float far);		///< Generates orthographic matrix based on supplied screen dimensions and near & far plane.
 
@@ -50,7 +51,7 @@ public:
 	XMFLOAT4 getSpecularColour();		///< Get specular colour, returns float4
 	float getSpecularPower();			///< Get specular power, returns float
 	XMFLOAT3 getPosition();				///< Get light position, returns float3
-	XMMATRIX getViewMatrix();			///< Get light view matrix for shadow mapping, returns XMMATRIX
+	XMMATRIX getViewMatrix();	///< Get light view matrix for shadow mapping, returns XMMATRIX
 	XMMATRIX getProjectionMatrix();		///< Get light projection matrix for shadow mapping, returns XMMATRIX
 	XMMATRIX getOrthoMatrix();			///< Get light orthographic matrix for shadow mapping, returns XMMATRIX
 

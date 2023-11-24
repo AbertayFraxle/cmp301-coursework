@@ -167,6 +167,7 @@
     <ClCompile Include="DepthShader.cpp" />
     <ClCompile Include="LightShader.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="TerrainDepthShader.cpp" />
     <ClCompile Include="TerrainShader.cpp" />
     <ClCompile Include="TesselationPlane.cpp" />
     <ClCompile Include="TextureShader.cpp" />
@@ -196,6 +197,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
+    <FxCompile Include="terraindepth_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="terraindepth_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="terrain_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -223,6 +230,7 @@
     <ClInclude Include="App1.h" />
     <ClInclude Include="DepthShader.h" />
     <ClInclude Include="LightShader.h" />
+    <ClInclude Include="TerrainDepthShader.h" />
     <ClInclude Include="TerrainShader.h" />
     <ClInclude Include="TesselationPlane.h" />
     <ClInclude Include="TextureShader.h" />

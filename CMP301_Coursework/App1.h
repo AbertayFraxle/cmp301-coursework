@@ -10,6 +10,7 @@
 #include "TextureShader.h"
 #include "TesselationPlane.h"
 #include "DepthShader.h"
+#include "TerrainDepthShader.h"
 
 
 class App1 : public BaseApplication
@@ -49,6 +50,7 @@ private:
 	WaterShader* waterShader;
 	DepthShader* depthShader;
 	TextureShader* textureShader;
+	TerrainDepthShader* terrainDepthShader;
 
 	Light* light1;
 	Light* light2;

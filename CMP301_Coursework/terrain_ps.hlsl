@@ -8,7 +8,7 @@
 Texture2D texture0 : register(t0);
 Texture2D texture1 : register(t1);
 
-Texture2D depthMapTexture : register(t2);
+Texture2D depthMapTexture[6] : register(t2);
 
 SamplerState sampler0 : register(s0);
 SamplerState shadowSampler : register(s1);
@@ -130,32 +130,33 @@ float4 main(InputType input) : SV_TARGET
         if (hasDepthData(pTexCoord))
         {
         
-            
-            if (!isInShadow(depthMapTexture, pTexCoord, input.lightViewPos, shadowMapBias))
-            {
-            
-        
-             // rPosition = mul(rPosition, viewMatrix).xyz;
-		    //check if there's a direction, for this week, the only light with a direction will be the directional light
-                if (length(direction[i]) <= 0)
+            for (int j = 0; j < 6; j++) {
+                if (!isInShadow(depthMapTexture[j], pTexCoord, input.lightViewPos, shadowMapBias))
                 {
-            //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
-                    lightVector[i] = normalize(lightPosition[i].xyz - input.worldPosition);
 
-            //get the distance of the lit point to the light source
-                    float dist = length(lightPosition[i].xyz - input.worldPosition);
 
-            //calculate the attenuation
-                    float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));
+                    // rPosition = mul(rPosition, viewMatrix).xyz;
+                   //check if there's a direction, for this week, the only light with a direction will be the directional light
+                    if (length(direction[i]) <= 0)
+                    {
+                        //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
+                        lightVector[i] = normalize(lightPosition[i].xyz - input.worldPosition);
 
-            //calculate the lighting of the point
-                    lightColour += saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
-                }
-                else
-                {
-            //calculate the lighting intensity for the directional light
-                    float intensity = saturate(dot(input.normal, -direction[i].xyz));
-                    lightColour += saturate(diffuse[i] * intensity);
+                        //get the distance of the lit point to the light source
+                        float dist = length(lightPosition[i].xyz - input.worldPosition);
+
+                        //calculate the attenuation
+                        float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));
+
+                        //calculate the lighting of the point
+                        lightColour += saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
+                    }
+                    else
+                    {
+                        //calculate the lighting intensity for the directional light
+                        float intensity = saturate(dot(input.normal, -direction[i].xyz));
+                        lightColour += saturate(diffuse[i] * intensity);
+                    }
                 }
             }
         }
