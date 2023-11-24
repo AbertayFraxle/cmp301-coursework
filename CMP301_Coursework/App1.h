@@ -7,7 +7,9 @@
 #include "LightShader.h"
 #include "TerrainShader.h"
 #include "WaterShader.h"
+#include "TextureShader.h"
 #include "TesselationPlane.h"
+#include "DepthShader.h"
 
 
 class App1 : public BaseApplication
@@ -25,6 +27,7 @@ protected:
 
 	bool render();
 
+	void depthPass();
 	void firstPass();
 	void finalPass();
 	
@@ -34,15 +37,24 @@ private:
 	
 	PlaneMesh* terrain;
 	PlaneMesh* water;
+
+	CubeMesh* cube;
+
+	OrthoMesh* playerView;
+
 	//TessellationPlane* water;
 
 	TerrainShader* terrainShader;
 	LightShader* lightShader;
 	WaterShader* waterShader;
+	DepthShader* depthShader;
+	TextureShader* textureShader;
 
 	Light* light1;
 	Light* light2;
 	Light* light3;
+
+	ShadowMap* shadowMap;
 
 	float debuglightPos[3];
 

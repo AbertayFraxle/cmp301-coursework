@@ -71,6 +71,8 @@ void TerrainShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	renderer->CreateSamplerState(&samplerDesc, &sampleState);
 
+	renderer->CreateSamplerState(&samplerDesc, &shadowSampleState);
+
 	// Setup light buffer
 	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
 	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
@@ -84,7 +86,7 @@ void TerrainShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 }
 
 
-void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* heightmap, Light* light1, Light* light2, Light* light3)
+void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* heightmap, ID3D11ShaderResourceView* shadowmap, Light* light1, Light* light2, Light* light3)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -98,11 +100,17 @@ void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	tworld = XMMatrixTranspose(worldMatrix);
 	tview = XMMatrixTranspose(viewMatrix);
 	tproj = XMMatrixTranspose(projectionMatrix);
+
+	XMMATRIX tLightViewMatrix = XMMatrixTranspose(light3->getViewMatrix());
+	XMMATRIX tLightProjectionMatrix = XMMatrixTranspose(light3->getOrthoMatrix());
+
 	result = deviceContext->Map(matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 	dataPtr->world = tworld;// worldMatrix;
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
+	dataPtr->lightView = tLightViewMatrix;
+	dataPtr->lightProjection = tLightProjectionMatrix;
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 	deviceContext->PSSetConstantBuffers(1, 1, &matrixBuffer);
@@ -135,7 +143,10 @@ void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &lowTex);
 	deviceContext->PSSetShaderResources(1, 1, &highTex);
+	deviceContext->PSSetShaderResources(2, 1, &shadowmap);
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
+	deviceContext->PSSetSamplers(1, 1, &shadowSampleState);
+
 
 	deviceContext->VSSetShaderResources(0, 1, &heightmap);
 	deviceContext->VSSetSamplers(0, 1, &sampleState);

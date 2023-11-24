@@ -18,7 +18,7 @@ ShadowMap::ShadowMap(ID3D11Device* device, int mWidth, int mHeight)
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 
-	//ID3D11Texture2D* depthMap = 0;
+	ID3D11Texture2D* depthMap = 0;
 	device->CreateTexture2D(&texDesc, 0, &depthMap);
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
