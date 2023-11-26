@@ -23,48 +23,6 @@ void Light::generateViewMatrix()
 	viewMatrix = XMMatrixLookAtLH(position, position + dir, up);
 }
 
-void Light::generateViewMatrix(int index)
-{
-	// default up vector
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-	if (direction.y == 1 || (direction.x == 0 && direction.z == 0))
-	{
-		up = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0);
-	}
-	else if (direction.y == -1 || (direction.x == 0 && direction.z == 0))
-	{
-		up = XMVectorSet(0.0f, 0.0f, -1.0f, 1.0);
-	}
-	//XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-	XMVECTOR dir;
-	switch (index) {
-	case 0:
-		dir = XMVectorSet(1,0,0,1);
-		break;
-	case 1:
-		dir = XMVectorSet(0, 1, 0, 1);
-		break;
-	case 2:
-		dir = XMVectorSet(0, 0, 1, 1);
-		break;
-	case 3:
-		dir = XMVectorSet(-1, 0, 0, 1);
-		break;
-	case 4:
-		dir = XMVectorSet(0, -1, 0, 1);
-		break;
-	case 5:
-		dir = XMVectorSet(0, 0, -1, 1);
-		break;
-	}
-
-
-	XMVECTOR right = XMVector3Cross(dir, up);
-	up = XMVector3Cross(right, dir);
-	// Create the view matrix from the three vectors.
-	viewMatrix = XMMatrixLookAtLH(position, position + dir, up);
-}
-
 
 // Create a projection matrix for the (point) light source. Used in shadow mapping.
 void Light::generateProjectionMatrix(float screenNear, float screenFar)
@@ -110,6 +68,10 @@ void Light::setSpecularPower(float power)
 	specularPower = power;
 }
 
+void Light::setConeAngle(float nCAngle) {
+	coneAngle = nCAngle;
+}
+
 void Light::setPosition(float x, float y, float z)
 {
 	position = XMVectorSet(x, y, z, 1.0f);
@@ -140,6 +102,11 @@ XMFLOAT4 Light::getSpecularColour()
 float Light::getSpecularPower()
 {
 	return specularPower;
+}
+
+float Light::getConeAngle()
+{
+	return coneAngle;
 }
 
 XMFLOAT3 Light::getPosition()

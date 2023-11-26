@@ -1,6 +1,6 @@
 #pragma once
 
-#define LIGHTCOUNT 3
+#define LIGHTCOUNT 4
 
 #include "DXF.h"
 
@@ -18,14 +18,14 @@ private:
 		XMFLOAT4 position[LIGHTCOUNT];
 		XMFLOAT4 direction[LIGHTCOUNT];
 		XMFLOAT4 factors[LIGHTCOUNT];
-
+		XMFLOAT4 coneangle[LIGHTCOUNT];
 	};
 
 public:
 	LightShader(ID3D11Device* device, HWND hwnd);
 	~LightShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, Light* light1, Light* light2,Light*light3);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* normal, Light* lights[LIGHTCOUNT]);
 
 private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);

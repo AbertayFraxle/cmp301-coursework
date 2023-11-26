@@ -1,7 +1,7 @@
 // Light vertex shader
 // Standard issue vertex shader, apply matrices, pass info to pixel shader
 #define STEPAMOUNT 0.01f
-
+#define LIGHTCOUNT 4
 
 Texture2D heightMap : register(t0);
 SamplerState sampler0 : register(s0);
@@ -11,8 +11,8 @@ cbuffer MatrixBuffer : register(b0)
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
-    matrix lightViewMatrix;
-    matrix lightProjectionMatrix;
+    matrix lightViewMatrix[LIGHTCOUNT];
+    matrix lightProjectionMatrix[LIGHTCOUNT];
 };
 
 
@@ -29,7 +29,7 @@ struct OutputType
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
     float3 worldPosition : TEXCOORD1;
-    float4 lightViewPos : TEXCOORD2;
+    float4 lightViewPos[LIGHTCOUNT] : TEXCOORD2;
 };
 
 OutputType main(InputType input)
@@ -66,9 +66,13 @@ OutputType main(InputType input)
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
     
-    output.lightViewPos = mul(input.position, worldMatrix);
-    output.lightViewPos = mul(output.lightViewPos, lightViewMatrix);
-    output.lightViewPos = mul(output.lightViewPos, lightProjectionMatrix);
+    for (int i = 0; i < LIGHTCOUNT; i++)
+    {
+        output.lightViewPos[i] = mul(input.position, worldMatrix);
+        output.lightViewPos[i] = mul(output.lightViewPos[i], lightViewMatrix[i]);
+        output.lightViewPos[i] = mul(output.lightViewPos[i], lightProjectionMatrix[i]);
+        
+    }
 	// Store the texture coordinates for the pixel shader.
     output.tex = input.tex*20;
 

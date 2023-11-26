@@ -41,6 +41,9 @@ private:
 
 	CubeMesh* cube;
 
+	AModel* beachHut;
+	AModel* light;
+
 	OrthoMesh* playerView;
 
 	//TessellationPlane* water;
@@ -52,11 +55,8 @@ private:
 	TextureShader* textureShader;
 	TerrainDepthShader* terrainDepthShader;
 
-	Light* light1;
-	Light* light2;
-	Light* light3;
-
-	ShadowMap* shadowMap;
+	Light* lights[LIGHTCOUNT];
+	ShadowMap* shadowMaps[LIGHTCOUNT];
 
 	float debuglightPos[3];
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DXF.h"
-#define LIGHTCOUNT 3
+#define LIGHTCOUNT 4
 
 using namespace std;
 using namespace DirectX;
@@ -16,7 +16,7 @@ private:
 		XMFLOAT4 position[LIGHTCOUNT];
 		XMFLOAT4 direction[LIGHTCOUNT];
 		XMFLOAT4 factors[LIGHTCOUNT];
-
+		XMFLOAT4 coneangle[LIGHTCOUNT];
 	};
 
 	struct TimeBufferType
@@ -32,7 +32,7 @@ public:
 	WaterShader(ID3D11Device* device, HWND hwnd);
 	~WaterShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, Light* light1, Light* light2, Light* light3, float time);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, Light* lights[LIGHTCOUNT], float time);
 
 private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);

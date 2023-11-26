@@ -86,7 +86,7 @@ void TerrainShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 }
 
 
-void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* heightmap, ID3D11ShaderResourceView* shadowmap, Light* light1, Light* light2, Light* light3)
+void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* heightmap, ShadowMap * shadowMap[LIGHTCOUNT], Light* lights[LIGHTCOUNT])
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -101,16 +101,27 @@ void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	tview = XMMatrixTranspose(viewMatrix);
 	tproj = XMMatrixTranspose(projectionMatrix);
 
-	XMMATRIX tLightViewMatrix = XMMatrixTranspose(light3->getViewMatrix());
-	XMMATRIX tLightProjectionMatrix = XMMatrixTranspose(light3->getOrthoMatrix());
+
 
 	result = deviceContext->Map(matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 	dataPtr->world = tworld;// worldMatrix;
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
-	dataPtr->lightView = tLightViewMatrix;
-	dataPtr->lightProjection = tLightProjectionMatrix;
+
+	for (int i = 0; i < LIGHTCOUNT; i++) {
+		XMMATRIX tLightViewMatrix = XMMatrixTranspose(lights[i]->getViewMatrix());
+		XMMATRIX tLightProjectionMatrix;
+		if (lights[i]->getConeAngle() == 0) {
+			tLightProjectionMatrix = XMMatrixTranspose(lights[i]->getOrthoMatrix());
+		}
+		else {
+			tLightProjectionMatrix = XMMatrixTranspose(lights[i]->getProjectionMatrix());
+		}
+		dataPtr->lightView[i] = tLightViewMatrix;
+		dataPtr->lightProjection[i] = tLightProjectionMatrix;
+	}
+
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 	deviceContext->PSSetConstantBuffers(1, 1, &matrixBuffer);
@@ -118,23 +129,15 @@ void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	LightBufferType* lightPtr;
 	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	lightPtr = (LightBufferType*)mappedResource.pData;
-	lightPtr->ambient[0] = light1->getAmbientColour();
-	lightPtr->diffuse[0] = light1->getDiffuseColour();
-	lightPtr->position[0] = XMFLOAT4(light1->getPosition().x, light1->getPosition().y, light1->getPosition().z, 0);
-	lightPtr->direction[0] = XMFLOAT4(0, 0, 0, 0);
-	lightPtr->factors[0] = XMFLOAT4(0.5, 0.125, 0, 0);
 
-	lightPtr->ambient[1] = light2->getAmbientColour();
-	lightPtr->diffuse[1] = light2->getDiffuseColour();
-	lightPtr->position[1] = XMFLOAT4(light2->getPosition().x, light2->getPosition().y, light2->getPosition().z, 0);
-	lightPtr->direction[1] = XMFLOAT4(0, 0, 0, 0);
-	lightPtr->factors[1] = XMFLOAT4(0.5, 0.125, 0, 0);
-
-	lightPtr->ambient[2] = light3->getAmbientColour();
-	lightPtr->diffuse[2] = light3->getDiffuseColour();
-	lightPtr->position[2] = XMFLOAT4(0, 0, 0, 0);
-	lightPtr->direction[2] = XMFLOAT4(light3->getDirection().x, light3->getDirection().y, light3->getDirection().z, 0);
-	lightPtr->factors[2] = XMFLOAT4(0, 0, 0, 0);
+	for (int i = 0; i < LIGHTCOUNT; i++) {
+		lightPtr->ambient[i] = lights[i]->getAmbientColour();
+		lightPtr->diffuse[i] = lights[i]->getDiffuseColour();
+		lightPtr->position[i] = XMFLOAT4(lights[i]->getPosition().x, lights[i]->getPosition().y, lights[i]->getPosition().z, 1);
+		lightPtr->direction[i] = XMFLOAT4(lights[i]->getDirection().x, lights[i]->getDirection().y, lights[i]->getDirection().z, 1);
+		lightPtr->factors[i] = XMFLOAT4(0.5, 0.125, 0, 0);
+		lightPtr->coneangle[i] = XMFLOAT4(lights[i]->getConeAngle(), 0, 0, 0);
+	}
 
 	deviceContext->Unmap(lightBuffer, 0);
 	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
@@ -143,7 +146,11 @@ void TerrainShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &lowTex);
 	deviceContext->PSSetShaderResources(1, 1, &highTex);
-	deviceContext->PSSetShaderResources(2, 1, &shadowmap);
+	for (int i = 0; i < LIGHTCOUNT; i++) {
+		ID3D11ShaderResourceView* map = shadowMap[i]->getDepthMapSRV();
+
+		deviceContext->PSSetShaderResources(2+i, 1, &map);
+	}
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
 	deviceContext->PSSetSamplers(1, 1, &shadowSampleState);
 

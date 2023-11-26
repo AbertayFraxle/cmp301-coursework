@@ -1,14 +1,14 @@
 // Light pixel shader
 // Calculate diffuse lighting for a single directional light (also texturing)
 
-#define LIGHTCOUNT 3
+#define LIGHTCOUNT 4
 #define TEXTURECHANGE 8
 #define BLENDREGION 2
 
 Texture2D texture0 : register(t0);
 Texture2D texture1 : register(t1);
 
-Texture2D depthMapTexture[6] : register(t2);
+Texture2D depthMapTexture[LIGHTCOUNT]: register(t2);
 
 SamplerState sampler0 : register(s0);
 SamplerState shadowSampler : register(s1);
@@ -21,6 +21,7 @@ cbuffer LightBuffer : register(b0)
     float4 lightPosition[LIGHTCOUNT];
     float4 direction[LIGHTCOUNT];
     float4 factors[LIGHTCOUNT];
+    float4 coneAngle[LIGHTCOUNT];
 };
 
 cbuffer MatrixBuffer : register(b1)
@@ -39,7 +40,7 @@ struct InputType
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
     float3 worldPosition : TEXCOORD1;
-    float4 lightViewPos : TEXCOORD2;
+    float4 lightViewPos[LIGHTCOUNT] : TEXCOORD2;
 };
 
 // Calculate lighting intensity based on direction and normal. Combine with light colour.
@@ -90,9 +91,8 @@ float4 main(InputType input) : SV_TARGET
     float4 textureColour;
     float diff = abs(input.worldPosition.y - TEXTURECHANGE);
     
-    float2 pTexCoord = getProjectiveCoords(input.lightViewPos);
     
-    float shadowMapBias = 0.005f;
+    float shadowMapBias = 0.0025f;
 
 	// Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
     if (input.worldPosition.y < TEXTURECHANGE)
@@ -125,19 +125,21 @@ float4 main(InputType input) : SV_TARGET
     for (int i = 0; i < LIGHTCOUNT; i++)
     {
        
-        
+        float2 pTexCoord = getProjectiveCoords(input.lightViewPos[i]);
+    
         
         if (hasDepthData(pTexCoord))
         {
-        
-            for (int j = 0; j < 6; j++) {
-                if (!isInShadow(depthMapTexture[j], pTexCoord, input.lightViewPos, shadowMapBias))
+       
+                float4 calcLight = float4(0, 0, 0, 1);
+                
+                if (!isInShadow(depthMapTexture[i], pTexCoord, input.lightViewPos[i], shadowMapBias))
                 {
-
+                    
 
                     // rPosition = mul(rPosition, viewMatrix).xyz;
                    //check if there's a direction, for this week, the only light with a direction will be the directional light
-                    if (length(direction[i]) <= 0)
+                    if (coneAngle[i].x > 0.f)
                     {
                         //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
                         lightVector[i] = normalize(lightPosition[i].xyz - input.worldPosition);
@@ -149,16 +151,23 @@ float4 main(InputType input) : SV_TARGET
                         float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));
 
                         //calculate the lighting of the point
-                        lightColour += saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
+                    
+                    
+                        calcLight = saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
+                        calcLight *= pow(max(dot(-lightVector[i], direction[i].xyz), 0.0f), coneAngle[i].x);
+                        
+                        lightColour += calcLight;
                     }
                     else
                     {
                         //calculate the lighting intensity for the directional light
                         float intensity = saturate(dot(input.normal, -direction[i].xyz));
-                        lightColour += saturate(diffuse[i] * intensity);
+                        calcLight += saturate(diffuse[i] * intensity);
+                        
+                        lightColour += calcLight;
                     }
                 }
-            }
+            
         }
        
        

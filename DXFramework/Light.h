@@ -30,8 +30,7 @@ public:
 		_mm_free(p);
 	}
 
-	void generateViewMatrix();	
-	void generateViewMatrix(int index);///< Generates and upto date view matrix, based on current rotation
+	void generateViewMatrix();	///< Generates and upto date view matrix, based on current rotation
 	void generateProjectionMatrix(float screenNear, float screenFar);			///< Generate project matrix based on current rotation and provided near & far plane
 	void generateOrthoMatrix(float screenWidth, float screenHeight, float near, float far);		///< Generates orthographic matrix based on supplied screen dimensions and near & far plane.
 
@@ -40,7 +39,8 @@ public:
 	void setDiffuseColour(float red, float green, float blue, float alpha);		///< Set diffuse colour RGBA
 	void setDirection(float x, float y, float z);								///< Set light direction (for directional lights)
 	void setSpecularColour(float red, float green, float blue, float alpha);	///< set specular colour RGBA
-	void setSpecularPower(float power);											///< Set specular power
+	void setSpecularPower(float power);				///< Set specular power
+	void setConeAngle(float nCAngle);
 	void setPosition(float x, float y, float z);								///< Set light position (for point lights)
 	void setLookAt(float x, float y, float z);									///< Set light lookAt (near deprecation)
 
@@ -49,7 +49,8 @@ public:
 	XMFLOAT4 getDiffuseColour();		///< Get diffuse colour, returns float4
 	XMFLOAT3 getDirection();			///< Get light direction, returns float3
 	XMFLOAT4 getSpecularColour();		///< Get specular colour, returns float4
-	float getSpecularPower();			///< Get specular power, returns float
+	float getSpecularPower();	///< Get specular power, returns float
+	float getConeAngle();
 	XMFLOAT3 getPosition();				///< Get light position, returns float3
 	XMMATRIX getViewMatrix();	///< Get light view matrix for shadow mapping, returns XMMATRIX
 	XMMATRIX getProjectionMatrix();		///< Get light projection matrix for shadow mapping, returns XMMATRIX
@@ -62,6 +63,7 @@ protected:
 	XMFLOAT3 direction;
 	XMFLOAT4 specularColour;
 	float specularPower;
+	float coneAngle;
 	XMVECTOR position;
 	XMMATRIX viewMatrix;
 	XMMATRIX projectionMatrix;

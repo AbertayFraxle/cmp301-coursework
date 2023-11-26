@@ -1,9 +1,10 @@
 // Light pixel shader
 // Calculate diffuse lighting for a single directional light (also texturing)
 
-#define LIGHTCOUNT 3
+#define LIGHTCOUNT 4
 
 Texture2D texture0 : register(t0);
+Texture2D normal : register(t1);
 SamplerState sampler0 : register(s0);
 
 cbuffer LightBuffer : register(b0)
@@ -13,6 +14,7 @@ cbuffer LightBuffer : register(b0)
     float4 position[LIGHTCOUNT];
     float4 direction[LIGHTCOUNT];
     float4 factors[LIGHTCOUNT];
+    float4 coneAngle[LIGHTCOUNT];
 };
 
 cbuffer MatrixBuffer : register(b1)
@@ -42,17 +44,29 @@ float4 calculateLighting(float3 lightDirection, float3 normal, float4 ldiffuse)
 float4 main(InputType input) : SV_TARGET
 {
 
+    
 	// Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
 	float4 textureColour = texture0.Sample(sampler0, input.tex);
+    
+    if (all(textureColour == float4(1, 1, 1,1)))
+    {
+        return textureColour;
+    }
+    
     float3 lightVector[LIGHTCOUNT];
     float4 lightColour = float4(0, 0, 0, 0);
 
+    float4 newNorm =  normal.Sample(sampler0, input.tex);
+    float3 backup = input.normal;
+    
+    input.normal = normalize(input.normal + newNorm);
+    
 	//loop for all the lights in the scene
     for (int i = 0; i < LIGHTCOUNT; i++)
     {
-
+        float4 calcLight = float4(0, 0, 0, 1);
 		//check if there's a direction, for this week, the only light with a direction will be the directional light
-        if (length(direction[i]) <= 0)
+        if (coneAngle[i].x > 0.f)
         {
             float3 rPosition = position[i].xyz;
             rPosition = mul(rPosition, worldMatrix);
@@ -67,14 +81,30 @@ float4 main(InputType input) : SV_TARGET
             //calculate the attenuation
 		    float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));
 
+            
+            
             //calculate the lighting of the point
-		    lightColour += saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
+            
+            if (dot(backup.xyz, -lightVector[i].xyz) < 0)
+            {
+            
+            
+                calcLight = saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
+            
+            
+
+                calcLight *= pow(max(dot(-lightVector[i], direction[i].xyz), 0.0f), coneAngle[i].x);
+            
+                lightColour += calcLight;
+            }
         }
         else
         {
             //calculate the lighting intensity for the directional light
             float intensity = saturate(dot(input.normal, -direction[i].xyz));
-            lightColour += saturate(diffuse[i] * intensity);
+            calcLight += saturate(diffuse[i] * intensity);
+            
+            lightColour += calcLight;
         }
     }
 	
@@ -87,6 +117,8 @@ float4 main(InputType input) : SV_TARGET
         lightColour += ambient[i];
     }
 
+ 
+    
     //multiply the light colour and the texture colour
     return lightColour * textureColour;
 }
