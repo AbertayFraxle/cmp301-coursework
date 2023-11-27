@@ -26,6 +26,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	beachHut = new AModel(renderer->getDevice(), "res/hut.obj");
 	light = new AModel(renderer->getDevice(), "res/light.obj");
 
+	drunk = false;
+
 	playerView = new OrthoMesh(renderer->getDevice(),renderer->getDeviceContext(), screenWidth, screenHeight);
 	textureMgr->loadTexture(L"sand", L"res/sand.png");
 	textureMgr->loadTexture(L"terrainHeight", L"res/heightmap.png");
@@ -62,29 +64,29 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	lights[0]->setAmbientColour(0.05f, 0.05f, 0.05f, 1.0f);
 	lights[0]->setDiffuseColour(0.3f, 0.3f, 0.3f, 1.0f);
 	lights[0]->setDirection(1.f, -1.f, 1.f);
-	lights[0]->setPosition(0.f, 30.f, 0.f);
+	lights[0]->setPosition(-0.25f, 30.f, 0.f);
 	lights[0]->setConeAngle(0.f);
 
 	lights[1] = new Light();
 	lights[1]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	lights[1]->setDiffuseColour(1.0f, 1.f, 1.0f, 1.0f);
 	lights[1]->setPosition(48.325f, 14.1f, 55.f);
-	lights[1]->setDirection(0.f, -1.f, 0.f);
-	lights[1]->setConeAngle(5.f);
+	lights[1]->setDirection(0.0f, -1.f, 0.f);
+	lights[1]->setConeAngle(15.f);
 
 	lights[2] = new Light();
 	lights[2]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	lights[2]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
 	lights[2]->setPosition(48.325f, 14.1f, 57.f);
-	lights[2]->setDirection(0.f, -1.f, 0.f);
-	lights[2]->setConeAngle(5.f);
+	lights[2]->setDirection(0.0f, -1.f, 0.f);
+	lights[2]->setConeAngle(15.f);
 
 	lights[3] = new Light();
 	lights[3]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	lights[3]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
 	lights[3]->setPosition(48.325f, 14.1f, 53.f);
-	lights[3]->setDirection(0.f, -1.f, 0.f);
-	lights[3]->setConeAngle(5.f);
+	lights[3]->setDirection(0.0f, -1.f, 0.f);
+	lights[3]->setConeAngle(15.f);
 
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 		if (lights[i]->getConeAngle() == 0) {
@@ -283,8 +285,15 @@ void App1::finalPass()
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 	renderer->setZBuffer(false);
 	playerView->sendData(renderer->getDeviceContext());
-	drunkShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix,camera->getOrthoViewMatrix(), sceneTexture->getOrthoMatrix(), sceneTexture->getShaderResourceView(),elapsedTime);
-	drunkShader->render(renderer->getDeviceContext(), playerView->getIndexCount());
+
+	if (drunk) {
+		drunkShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, camera->getOrthoViewMatrix(), sceneTexture->getOrthoMatrix(), sceneTexture->getShaderResourceView(), elapsedTime);
+		drunkShader->render(renderer->getDeviceContext(), playerView->getIndexCount());
+	}
+	else {
+		textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, camera->getOrthoViewMatrix(), sceneTexture->getOrthoMatrix(), sceneTexture->getShaderResourceView());
+		textureShader->render(renderer->getDeviceContext(), playerView->getIndexCount());
+	}
 	renderer->setZBuffer(true);
 	gui();
 
@@ -303,6 +312,8 @@ void App1::gui()
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 	ImGui::Text("Press E to raise camera \nto see the plane being rendered");
+
+	ImGui::Checkbox("Drunk", &drunk);
 
 	// Render UI
 	ImGui::Render();

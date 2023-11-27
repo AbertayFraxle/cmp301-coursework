@@ -108,7 +108,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\frase\Documents\GitHub\cmp301-coursework\DXFramework;$(solutiondir)\include\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)DXFramework\;$(solutiondir)include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

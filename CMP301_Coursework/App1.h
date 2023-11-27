@@ -37,6 +37,8 @@ protected:
 
 private:
 	
+	bool drunk;
+
 	PlaneMesh* terrain;
 	PlaneMesh* water;
 
