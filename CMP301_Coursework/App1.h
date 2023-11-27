@@ -11,6 +11,7 @@
 #include "TesselationPlane.h"
 #include "DepthShader.h"
 #include "TerrainDepthShader.h"
+#include "DrunkShader.h"
 
 
 class App1 : public BaseApplication
@@ -40,10 +41,12 @@ private:
 	PlaneMesh* water;
 
 	CubeMesh* cube;
+	SphereMesh* debugSphere;
 
 	AModel* beachHut;
 	AModel* light;
 
+	RenderTexture* sceneTexture;
 	OrthoMesh* playerView;
 
 	//TessellationPlane* water;
@@ -54,6 +57,7 @@ private:
 	DepthShader* depthShader;
 	TextureShader* textureShader;
 	TerrainDepthShader* terrainDepthShader;
+	DrunkShader* drunkShader;
 
 	Light* lights[LIGHTCOUNT];
 	ShadowMap* shadowMaps[LIGHTCOUNT];

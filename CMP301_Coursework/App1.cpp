@@ -16,14 +16,17 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Create Mesh object and shader object
 	terrain = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext(),1000);
 	water = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext(),2400);
+	
+	sceneTexture = new RenderTexture(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
 
 	cube = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+	debugSphere = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 	//water = new TessellationPlane(renderer->getDevice(), renderer->getDeviceContext(), 100, 100);
 
 	beachHut = new AModel(renderer->getDevice(), "res/hut.obj");
 	light = new AModel(renderer->getDevice(), "res/light.obj");
 
-	playerView = new OrthoMesh(renderer->getDevice(),renderer->getDeviceContext(), 1024, 1024);
+	playerView = new OrthoMesh(renderer->getDevice(),renderer->getDeviceContext(), screenWidth, screenHeight);
 	textureMgr->loadTexture(L"sand", L"res/sand.png");
 	textureMgr->loadTexture(L"terrainHeight", L"res/heightmap.png");
 	textureMgr->loadTexture(L"water", L"res/water2.jpg");
@@ -41,6 +44,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	depthShader = new DepthShader(renderer->getDevice(), hwnd);
 	textureShader = new TextureShader(renderer->getDevice(), hwnd);
 	terrainDepthShader = new TerrainDepthShader(renderer->getDevice(), hwnd);
+	drunkShader = new DrunkShader(renderer->getDevice(), hwnd);
 
 	// Variables for defining shadow map
 	int shadowmapWidth = 4096;
@@ -63,23 +67,23 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	lights[1] = new Light();
 	lights[1]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
-	lights[1]->setDiffuseColour(0.0f, 1.f, 0.0f, 1.0f);
-	lights[1]->setPosition(48.5f, 14.1f, 55.f);
-	lights[1]->setDirection(-0.5f, -1.f, 0.f);
+	lights[1]->setDiffuseColour(1.0f, 1.f, 1.0f, 1.0f);
+	lights[1]->setPosition(48.325f, 14.1f, 55.f);
+	lights[1]->setDirection(0.f, -1.f, 0.f);
 	lights[1]->setConeAngle(5.f);
 
 	lights[2] = new Light();
 	lights[2]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
-	lights[2]->setDiffuseColour(1.0f, 0.0f, 0.0f, 1.0f);
-	lights[2]->setPosition(48.5f, 14.1f, 57.f);
-	lights[2]->setDirection(-0.5f, -1.f, 0.f);
+	lights[2]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
+	lights[2]->setPosition(48.325f, 14.1f, 57.f);
+	lights[2]->setDirection(0.f, -1.f, 0.f);
 	lights[2]->setConeAngle(5.f);
 
 	lights[3] = new Light();
 	lights[3]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
-	lights[3]->setDiffuseColour(0.0f, 0.0f, 1.0f, 1.0f);
-	lights[3]->setPosition(48.5f, 14.1f, 53.f);
-	lights[3]->setDirection(-0.5f, -1.f, 0.f);
+	lights[3]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
+	lights[3]->setPosition(48.325f, 14.1f, 53.f);
+	lights[3]->setDirection(0.f, -1.f, 0.f);
 	lights[3]->setConeAngle(5.f);
 
 	for (int i = 0; i < LIGHTCOUNT; i++) {
@@ -160,6 +164,7 @@ bool App1::render()
 {
 	depthPass();
 	firstPass();
+	finalPass();
 
 	return true;
 }
@@ -216,7 +221,8 @@ void App1::firstPass()
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 
 	// Clear the scene. (default blue colour)
-	renderer->beginScene(0.f, 0.f, 0.f, 1.0f);
+	sceneTexture->setRenderTarget(renderer->getDeviceContext());
+	sceneTexture->clearRenderTarget(renderer->getDeviceContext(),0.f,0.f,0.f, 1.0f);
 
 	// Generate the view matrix based on the camera's position.
 	camera->update();
@@ -253,20 +259,37 @@ void App1::firstPass()
 	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 57.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"bronze"), textureMgr->getTexture(L"bronzenormal"), lights);
 	lightShader->render(renderer->getDeviceContext(), light->getIndexCount());
 
-	//playerView->sendData(renderer->getDeviceContext());
-	//textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix,camera->getOrthoViewMatrix(), renderer->getOrthoMatrix(), shadowMap->getDepthMapSRV());
-	//textureShader->render(renderer->getDeviceContext(), playerView->getIndexCount());
+	/*
+	for (int i = 0; i < LIGHTCOUNT; i++) {
+		debugSphere->sendData(renderer->getDeviceContext());
+		lightShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(0.1f, 0.1f, 0.1f)) *XMMatrixTranslation(lights[i]->getPosition().x, lights[i]->getPosition().y, lights[i]->getPosition().z), viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"bronzenormal"), lights);
+		lightShader->render(renderer->getDeviceContext(), debugSphere->getIndexCount());
+	}
+	*/
+
+	
 
 	// Render GUI
-	gui();
+	renderer->setBackBufferRenderTarget();
 
-	// Swap the buffers
-	renderer->endScene();
+
 
 }
 
 void App1::finalPass()
 {
+	renderer->beginScene(0.39f, 0.58f, 0.92f, 1.0f);
+
+	XMMATRIX worldMatrix = renderer->getWorldMatrix();
+	renderer->setZBuffer(false);
+	playerView->sendData(renderer->getDeviceContext());
+	drunkShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix,camera->getOrthoViewMatrix(), sceneTexture->getOrthoMatrix(), sceneTexture->getShaderResourceView(),elapsedTime);
+	drunkShader->render(renderer->getDeviceContext(), playerView->getIndexCount());
+	renderer->setZBuffer(true);
+	gui();
+
+	// Swap the buffers
+	renderer->endScene();
 }
 
 void App1::gui()
