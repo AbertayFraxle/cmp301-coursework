@@ -1,7 +1,7 @@
 // Light vertex shader
 // Standard issue vertex shader, apply matrices, pass info to pixel shader
 #define STEPAMOUNT 0.01f
-#define LIGHTCOUNT 4
+#include "utils.h"
 
 Texture2D heightMap : register(t0);
 SamplerState sampler0 : register(s0);

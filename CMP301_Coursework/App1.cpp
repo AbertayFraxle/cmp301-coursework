@@ -71,21 +71,21 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	lights[1]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	lights[1]->setDiffuseColour(1.0f, 1.f, 1.0f, 1.0f);
 	lights[1]->setPosition(48.325f, 14.1f, 55.f);
-	lights[1]->setDirection(0.0f, -1.f, 0.f);
+	lights[1]->setDirection(-0.1f, -1.f, 0.f);
 	lights[1]->setConeAngle(15.f);
 
 	lights[2] = new Light();
 	lights[2]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	lights[2]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
 	lights[2]->setPosition(48.325f, 14.1f, 57.f);
-	lights[2]->setDirection(0.0f, -1.f, 0.f);
+	lights[2]->setDirection(-0.1f, -1.f, 0.f);
 	lights[2]->setConeAngle(15.f);
 
 	lights[3] = new Light();
 	lights[3]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
 	lights[3]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
 	lights[3]->setPosition(48.325f, 14.1f, 53.f);
-	lights[3]->setDirection(0.0f, -1.f, 0.f);
+	lights[3]->setDirection(-0.1f, -1.f, 0.f);
 	lights[3]->setConeAngle(15.f);
 
 	for (int i = 0; i < LIGHTCOUNT; i++) {
@@ -173,13 +173,19 @@ bool App1::render()
 
 void App1::depthPass()
 {
+
+	//loop for how many lights we have in the scene
 	for (int i = 0; i < LIGHTCOUNT; i++) {
+
+		//set the current light's shadowmap to be the render target
 		shadowMaps[i]->BindDsvAndSetNullRenderTarget(renderer->getDeviceContext());
-
+		
+		//generate view matrix for current light
 		lights[i]->generateViewMatrix();
-
+		
 		XMMATRIX lightProjectionMatrix;
 
+		//if light doesn't have a cone angle, use ortho matrix, else update and get projection matrix
 		if (lights[i]->getConeAngle() == 0) {
 			lightProjectionMatrix = lights[i]->getOrthoMatrix(); 
 		}
@@ -189,10 +195,12 @@ void App1::depthPass()
 		}
 
 
-
+		//get matrices
 		XMMATRIX lightViewMatrix = lights[i]->getViewMatrix();
 		XMMATRIX worldMatrix = renderer->getWorldMatrix();
 
+
+		//render the world
 		terrain->sendData(renderer->getDeviceContext());
 		terrainDepthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixScaling(0.1f, 1.f, 0.1f), lightViewMatrix, lightProjectionMatrix, textureMgr->getTexture(L"terrainHeight"));
 		terrainDepthShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
@@ -210,9 +218,10 @@ void App1::depthPass()
 		depthShader->render(renderer->getDeviceContext(), light->getIndexCount());
 
 		light->sendData(renderer->getDeviceContext());
-		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(5.f, 11.75f, 57.f), lightViewMatrix, lightProjectionMatrix);
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 57.f), lightViewMatrix, lightProjectionMatrix);
 		depthShader->render(renderer->getDeviceContext(), light->getIndexCount());
 
+		//reset
 		renderer->setBackBufferRenderTarget();
 		renderer->resetViewport();
 	}

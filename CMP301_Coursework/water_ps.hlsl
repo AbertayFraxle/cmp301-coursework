@@ -1,7 +1,7 @@
 // Light pixel shader
 // Calculate diffuse lighting for a single directional light (also texturing)
 
-#define LIGHTCOUNT 4
+#include "utils.h"
 
 Texture2D texture0 : register(t0);
 SamplerState sampler0 : register(s0);

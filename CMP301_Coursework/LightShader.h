@@ -1,6 +1,6 @@
 #pragma once
 
-#define LIGHTCOUNT 4
+#include "utils.h"
 
 #include "DXF.h"
 

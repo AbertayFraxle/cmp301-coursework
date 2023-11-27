@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DXF.h"
-#define LIGHTCOUNT 4
+#include "utils.h"
 
 using namespace std;
 using namespace DirectX;
@@ -24,8 +24,6 @@ private:
 		float time;
 		XMFLOAT3 padding;
 	};
-
-
 
 
 public:

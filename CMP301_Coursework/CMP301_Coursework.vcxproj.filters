@@ -104,6 +104,9 @@
     <ClInclude Include="DrunkShader.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

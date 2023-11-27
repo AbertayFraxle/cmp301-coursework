@@ -244,6 +244,7 @@
     <ClInclude Include="TerrainShader.h" />
     <ClInclude Include="TesselationPlane.h" />
     <ClInclude Include="TextureShader.h" />
+    <ClInclude Include="utils.h" />
     <ClInclude Include="WaterShader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

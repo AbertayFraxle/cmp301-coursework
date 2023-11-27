@@ -1,0 +1,1 @@
+#define LIGHTCOUNT 4
