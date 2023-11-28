@@ -5,7 +5,11 @@
 
 Texture2D texture0 : register(t0);
 Texture2D normal : register(t1);
+
+Texture2D depthMapTexture[LIGHTCOUNT] : register(t2);
+
 SamplerState sampler0 : register(s0);
+SamplerState shadowSampler : register(s1);
 
 cbuffer LightBuffer : register(b0)
 {
@@ -22,6 +26,8 @@ cbuffer MatrixBuffer : register(b1)
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
+    matrix lightViewMatrix[LIGHTCOUNT];
+    matrix lightProjectionMatrix[LIGHTCOUNT];
 };
 
 
@@ -31,6 +37,7 @@ struct InputType
 	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
 	float3 worldPosition : TEXCOORD1;
+    float4 lightViewPos[LIGHTCOUNT] : TEXCOORD2;
 };
 
 // Calculate lighting intensity based on direction and normal. Combine with light colour.
@@ -39,6 +46,40 @@ float4 calculateLighting(float3 lightDirection, float3 normal, float4 ldiffuse)
 	float intensity = saturate(dot(normal, lightDirection));
 	float4 colour = saturate(ldiffuse * intensity);
 	return colour;
+}
+
+bool hasDepthData(float2 uv)
+{
+    if (uv.x < 0.f || uv.x > 1.f || uv.y < 0.f || uv.y > 1.f)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool isInShadow(Texture2D sMap, float2 uv, float4 lightViewPosition, float bias)
+{
+    float depthValue = sMap.Sample(shadowSampler, uv).r;
+    
+    float lightDepthValue = lightViewPosition.z / lightViewPosition.w;
+    
+    lightDepthValue -= bias;
+    
+    if (lightDepthValue < depthValue)
+    {
+        return false;
+    }
+    return true;
+}
+
+float2 getProjectiveCoords(float4 lightViewPosition)
+{
+    float2 projTex = lightViewPosition.xy / lightViewPosition.w;
+    
+    projTex *= float2(0.5, -0.5);
+    projTex += float2(0.5f, 0.5f);
+    
+    return projTex;
 }
 
 float4 main(InputType input) : SV_TARGET
@@ -50,7 +91,8 @@ float4 main(InputType input) : SV_TARGET
     
     if (all(textureColour == float4(1, 1, 1,1)))
     {
-        return textureColour;
+        return float4(1.0f, 0.6f, 0.0f, 1.0f);
+
     }
     
     float3 lightVector[LIGHTCOUNT];
@@ -64,47 +106,62 @@ float4 main(InputType input) : SV_TARGET
 	//loop for all the lights in the scene
     for (int i = 0; i < LIGHTCOUNT; i++)
     {
-        float4 calcLight = float4(0, 0, 0, 1);
-		//check if there's a direction, for this week, the only light with a direction will be the directional light
-        if (coneAngle[i].x > 0.f)
+        float2 pTexCoord = getProjectiveCoords(input.lightViewPos[i]);
+    
+        float shadowMapBias = 0.005f;
+        
+        if (hasDepthData(pTexCoord))
         {
-            float3 rPosition = position[i].xyz;
-            rPosition = mul(rPosition, worldMatrix);
+       
+            float4 calcLight = float4(0, 0, 0, 1);
+                
+            if (!isInShadow(depthMapTexture[i], pTexCoord, input.lightViewPos[i], shadowMapBias))
+            {
+        
+        
+                float4 calcLight = float4(0, 0, 0, 1);
+		//check if there's a direction, for this week, the only light with a direction will be the directional light
+                if (coneAngle[i].x > 0.f)
+                {
+                    float3 rPosition = position[i].xyz;
+                    rPosition = mul(rPosition, worldMatrix);
             
 
             //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
-            lightVector[i] = normalize(rPosition - input.worldPosition);
+                    lightVector[i] = normalize(rPosition - input.worldPosition);
 
             //get the distance of the lit point to the light source
-		    float dist = length(rPosition - input.worldPosition);
+                    float dist = length(rPosition - input.worldPosition);
 
             //calculate the attenuation
-		    float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));
+                    float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));
 
             
             
             //calculate the lighting of the point
             
-            if (dot(backup.xyz, -lightVector[i].xyz) < 0)
-            {
+                    if (dot(backup.xyz, -lightVector[i].xyz) < 0)
+                    {
             
             
-                calcLight = saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
+                        calcLight = saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
             
             
 
-                calcLight *= pow(max(dot(-lightVector[i], direction[i].xyz), 0.0f), coneAngle[i].x);
+                        calcLight *= pow(max(dot(-lightVector[i], direction[i].xyz), 0.0f), coneAngle[i].x);
             
-                lightColour += calcLight;
-            }
-        }
-        else
-        {
+                        lightColour += calcLight;
+                    }
+                }
+                else
+                {
             //calculate the lighting intensity for the directional light
-            float intensity = saturate(dot(input.normal, -direction[i].xyz));
-            calcLight += saturate(diffuse[i] * intensity);
+                    float intensity = saturate(dot(input.normal, -direction[i].xyz));
+                    calcLight += saturate(diffuse[i] * intensity);
             
-            lightColour += calcLight;
+                    lightColour += calcLight;
+                }
+            }
         }
     }
 	

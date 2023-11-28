@@ -25,6 +25,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	beachHut = new AModel(renderer->getDevice(), "res/hut.obj");
 	light = new AModel(renderer->getDevice(), "res/light.obj");
+	stool = new AModel(renderer->getDevice(), "res/stool.obj");
 
 	drunk = false;
 
@@ -61,29 +62,29 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	//directional light
 	lights[0] = new Light();
-	lights[0]->setAmbientColour(0.05f, 0.05f, 0.05f, 1.0f);
-	lights[0]->setDiffuseColour(0.3f, 0.3f, 0.3f, 1.0f);
+	lights[0]->setAmbientColour(0.005f, 0.005f, 0.005f, 1.0f);
+	lights[0]->setDiffuseColour(0.1f, 0.1f, 0.1f, 1.0f);
 	lights[0]->setDirection(1.f, -1.f, 1.f);
 	lights[0]->setPosition(-0.25f, 30.f, 0.f);
 	lights[0]->setConeAngle(0.f);
 
 	lights[1] = new Light();
 	lights[1]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
-	lights[1]->setDiffuseColour(1.0f, 1.f, 1.0f, 1.0f);
+	lights[1]->setDiffuseColour(1.0f, 0.6f, 0.0f, 1.0f);
 	lights[1]->setPosition(48.325f, 14.1f, 55.f);
 	lights[1]->setDirection(-0.1f, -1.f, 0.f);
 	lights[1]->setConeAngle(15.f);
 
 	lights[2] = new Light();
 	lights[2]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
-	lights[2]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
+	lights[2]->setDiffuseColour(1.0f, 0.6f, 0.0f, 1.0f);
 	lights[2]->setPosition(48.325f, 14.1f, 57.f);
 	lights[2]->setDirection(-0.1f, -1.f, 0.f);
 	lights[2]->setConeAngle(15.f);
 
 	lights[3] = new Light();
 	lights[3]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
-	lights[3]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
+	lights[3]->setDiffuseColour(1.0f, 0.6f, 0.0f, 1.0f);
 	lights[3]->setPosition(48.325f, 14.1f, 53.f);
 	lights[3]->setDirection(-0.1f, -1.f, 0.f);
 	lights[3]->setConeAngle(15.f);
@@ -221,6 +222,26 @@ void App1::depthPass()
 		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 57.f), lightViewMatrix, lightProjectionMatrix);
 		depthShader->render(renderer->getDeviceContext(), light->getIndexCount());
 
+		stool->sendData(renderer->getDeviceContext());
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 55.f), lightViewMatrix, lightProjectionMatrix);
+		depthShader->render(renderer->getDeviceContext(),stool->getIndexCount());
+
+		stool->sendData(renderer->getDeviceContext());
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 53.f), lightViewMatrix, lightProjectionMatrix);
+		depthShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
+		stool->sendData(renderer->getDeviceContext());
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 57.f), lightViewMatrix, lightProjectionMatrix);
+		depthShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
+		stool->sendData(renderer->getDeviceContext());
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 56.f), lightViewMatrix, lightProjectionMatrix);
+		depthShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
+		stool->sendData(renderer->getDeviceContext());
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 54.f), lightViewMatrix, lightProjectionMatrix);
+		depthShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
 		//reset
 		renderer->setBackBufferRenderTarget();
 		renderer->resetViewport();
@@ -255,28 +276,50 @@ void App1::firstPass()
 	waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	beachHut->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 55.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 55.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
 	lightShader->render(renderer->getDeviceContext(), beachHut->getIndexCount());
     
 	light->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 53.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"bronze"), textureMgr->getTexture(L"bronzenormal"), lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 53.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"bronze"), textureMgr->getTexture(L"bronzenormal"), shadowMaps, lights);
 	lightShader->render(renderer->getDeviceContext(), light->getIndexCount());
 
 	light->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 55.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"bronze"), textureMgr->getTexture(L"bronzenormal"), lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 55.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"bronze"), textureMgr->getTexture(L"bronzenormal"), shadowMaps,lights);
 	lightShader->render(renderer->getDeviceContext(), light->getIndexCount());
 
 	light->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 57.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"bronze"), textureMgr->getTexture(L"bronzenormal"), lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 57.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"bronze"), textureMgr->getTexture(L"bronzenormal"), shadowMaps, lights);
 	lightShader->render(renderer->getDeviceContext(), light->getIndexCount());
 
+	stool->sendData(renderer->getDeviceContext());
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 55.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
+	stool->sendData(renderer->getDeviceContext());
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 53.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
+	stool->sendData(renderer->getDeviceContext());
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 57.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
+	stool->sendData(renderer->getDeviceContext());
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 56.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
+	stool->sendData(renderer->getDeviceContext());
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 54.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
+
+	
 	/*
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 		debugSphere->sendData(renderer->getDeviceContext());
-		lightShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(0.1f, 0.1f, 0.1f)) *XMMatrixTranslation(lights[i]->getPosition().x, lights[i]->getPosition().y, lights[i]->getPosition().z), viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"bronzenormal"), lights);
+		lightShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix * XMMatrixScaling(0.1f, 0.1f, 0.1f)) *XMMatrixTranslation(lights[i]->getPosition().x, lights[i]->getPosition().y, lights[i]->getPosition().z), viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"bronzenormal"),shadowMaps, lights);
 		lightShader->render(renderer->getDeviceContext(), debugSphere->getIndexCount());
 	}
 	*/
+	
 
 	
 

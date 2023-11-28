@@ -47,6 +47,7 @@ private:
 
 	AModel* beachHut;
 	AModel* light;
+	AModel* stool;
 
 	RenderTexture* sceneTexture;
 	OrthoMesh* playerView;

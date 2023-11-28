@@ -1,10 +1,13 @@
 // Light vertex shader
+#include "..\utils.h"
 // Standard issue vertex shader, apply matrices, pass info to pixel shader
 cbuffer MatrixBuffer : register(b0)
 {
 	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
+    matrix lightViewMatrix[LIGHTCOUNT];
+    matrix lightProjectionMatrix[LIGHTCOUNT];
 };
 
 struct InputType
@@ -20,6 +23,7 @@ struct OutputType
 	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
 	float3 worldPosition : TEXCOORD1;
+    float4 lightViewPos[LIGHTCOUNT] : TEXCOORD2;
 };
 
 OutputType main(InputType input)
@@ -31,6 +35,14 @@ OutputType main(InputType input)
 	output.position = mul(output.position, viewMatrix);
 	output.position = mul(output.position, projectionMatrix);
 
+    for (int i = 0; i < LIGHTCOUNT; i++)
+    {
+        output.lightViewPos[i] = mul(input.position, worldMatrix);
+        output.lightViewPos[i] = mul(output.lightViewPos[i], lightViewMatrix[i]);
+        output.lightViewPos[i] = mul(output.lightViewPos[i], lightProjectionMatrix[i]);
+        
+    }
+	
 	// Store the texture coordinates for the pixel shader.
     output.tex = input.tex;
 

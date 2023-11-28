@@ -29,8 +29,8 @@ cbuffer MatrixBuffer : register(b1)
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
-    matrix lightViewMatrix;
-    matrix lightProjectionMatrix;
+    matrix lightViewMatrix[LIGHTCOUNT];
+    matrix lightProjectionMatrix[LIGHTCOUNT];
 };
 
 

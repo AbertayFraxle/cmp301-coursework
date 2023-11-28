@@ -86,7 +86,7 @@ void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 }
 
 
-void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* normal, Light* lights[LIGHTCOUNT])
+void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* normal,  ShadowMap* shadowMap[LIGHTCOUNT], Light* lights[LIGHTCOUNT])
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -104,6 +104,20 @@ void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	dataPtr->world = tworld;// worldMatrix;
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
+
+	for (int i = 0; i < LIGHTCOUNT; i++) {
+		XMMATRIX tLightViewMatrix = XMMatrixTranspose(lights[i]->getViewMatrix());
+		XMMATRIX tLightProjectionMatrix;
+		if (lights[i]->getConeAngle() == 0) {
+			tLightProjectionMatrix = XMMatrixTranspose(lights[i]->getOrthoMatrix());
+		}
+		else {
+			tLightProjectionMatrix = XMMatrixTranspose(lights[i]->getProjectionMatrix());
+		}
+		dataPtr->lightView[i] = tLightViewMatrix;
+		dataPtr->lightProjection[i] = tLightProjectionMatrix;
+	}
+
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 	deviceContext->PSSetConstantBuffers(1, 1, &matrixBuffer);
@@ -128,5 +142,12 @@ void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);
 	deviceContext->PSSetShaderResources(1, 1, &normal);
+
+	for (int i = 0; i < LIGHTCOUNT; i++) {
+		ID3D11ShaderResourceView* map = shadowMap[i]->getDepthMapSRV();
+
+		deviceContext->PSSetShaderResources(2 + i, 1, &map);
+	}
+
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
 }
