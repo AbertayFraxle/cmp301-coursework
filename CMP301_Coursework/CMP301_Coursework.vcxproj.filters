@@ -43,6 +43,18 @@
     <FxCompile Include="drunk_ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="terrain_tess_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="terrain_tess_ds.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="terrain_tess_hs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="terrain_tess_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -60,7 +72,7 @@
     <ClCompile Include="WaterShader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="TesselationPlane.cpp">
+    <ClCompile Include="TessellationPlane.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="DepthShader.cpp">
@@ -73,6 +85,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="DrunkShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainTessellationShader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,7 +104,7 @@
     <ClInclude Include="WaterShader.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="TesselationPlane.h">
+    <ClInclude Include="TessellationPlane.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="DepthShader.h">
@@ -105,6 +120,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainTessellationShader.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

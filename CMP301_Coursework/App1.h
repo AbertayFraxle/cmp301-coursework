@@ -8,10 +8,11 @@
 #include "TerrainShader.h"
 #include "WaterShader.h"
 #include "TextureShader.h"
-#include "TesselationPlane.h"
+#include "TessellationPlane.h"
 #include "DepthShader.h"
 #include "TerrainDepthShader.h"
 #include "DrunkShader.h"
+#include "TerrainTessellationShader.h"
 
 
 class App1 : public BaseApplication
@@ -42,6 +43,8 @@ private:
 	PlaneMesh* terrain;
 	PlaneMesh* water;
 
+	TessellationPlane* newTerrain;
+
 	CubeMesh* cube;
 	SphereMesh* debugSphere;
 
@@ -61,6 +64,7 @@ private:
 	TextureShader* textureShader;
 	TerrainDepthShader* terrainDepthShader;
 	DrunkShader* drunkShader;
+	TerrainTessellationShader* terrainTessellationShader;
 
 	Light* lights[LIGHTCOUNT];
 	ShadowMap* shadowMaps[LIGHTCOUNT];
