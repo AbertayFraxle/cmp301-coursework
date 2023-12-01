@@ -1,7 +1,11 @@
 #include "TessellationPlane.h"
 
-TessellationPlane::TessellationPlane(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+TessellationPlane::TessellationPlane(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int nWidth, int nHeight)
 {
+	width = nWidth / 10;
+	height = nHeight / 10;
+
+
 	initBuffers(device);
 }
 
@@ -32,17 +36,18 @@ void TessellationPlane::initBuffers(ID3D11Device* device)
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 
-	vertexCount = 100;
+	vertexCount = (width+1)*(height+1);
 	indexCount = vertexCount*4;
 
 	vertices = new VertexType[vertexCount];
 	indices = new unsigned long[indexCount];
 
 	int vertCount = 0;
-	for (int i = 0; i < 10; i ++) {
-		for (int j = 0; j < 10; j ++) {
-			vertices[vertCount].position = XMFLOAT3(i, 0.0f, j);
+	for (int i = 0; i < (height + 1); i ++) {
+		for (int j = 0; j < (width + 1); j ++) {
+			vertices[vertCount].position = XMFLOAT3(i*10, 0.0f, j*10);
 			vertices[vertCount].normal = XMFLOAT3(0, 1.0f, 0.f);
+			vertices[vertCount].texture = XMFLOAT2(0.1*i, 0.1*j);
 
 			vertCount++;
 		}
@@ -50,14 +55,14 @@ void TessellationPlane::initBuffers(ID3D11Device* device)
 
 	int indCount = 0;
 	// Load the index array with data.
-	for (int i = 0; i < 9; i++) 
+	for (int i = 0; i < height ;i++) 
 	{
-		for (int j = 0; j < 9; j++) {
+		for (int j = 0; j <width; j++) {
 
-			indices[indCount] = (i*10)+j;
-			indices[indCount + 1] = (i * 10) + j + 10;
-			indices[indCount + 2] = (i * 10) + j + 11;
-			indices[indCount + 3] = (i * 10) + j + 1;
+			indices[indCount] = (i * (height+1)) + j;
+			indices[indCount + 1] = (i * (height + 1)) + j + (height + 1);
+			indices[indCount + 2] = (i * (height + 1)) + j + (height + 2);
+			indices[indCount + 3] = (i * (height + 1)) + j + 1;
 
 			indCount += 4;
 		}

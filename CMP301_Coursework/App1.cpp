@@ -3,27 +3,21 @@
 
 App1::App1()
 {
-	terrain = nullptr;
 	lightShader = nullptr;
-	terrainShader = nullptr;
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
 {
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
-
-	// Create Mesh object and shader object
-	terrain = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext(),1000);
-	water = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext(),2400);
 	
 	sceneTexture = new RenderTexture(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
 
-	cube = new CubeMesh(renderer->getDevice(), renderer->getDeviceContext());
+	cube = new AModel(renderer->getDevice(), "res/skybox.obj");
 	debugSphere = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	//water = new TessellationPlane(renderer->getDevice(), renderer->getDeviceContext(), 100, 100);
 
-	newTerrain = new TessellationPlane(renderer->getDevice(), renderer->getDeviceContext());
+	terrain = new TessellationPlane(renderer->getDevice(), renderer->getDeviceContext(),100,100);
+	water = new TessellationPlane(renderer->getDevice(), renderer->getDeviceContext(),800,800);
 
 	beachHut = new AModel(renderer->getDevice(), "res/hut.obj");
 	light = new AModel(renderer->getDevice(), "res/light.obj");
@@ -33,24 +27,30 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	playerView = new OrthoMesh(renderer->getDevice(),renderer->getDeviceContext(), screenWidth, screenHeight);
 	textureMgr->loadTexture(L"sand", L"res/sand.png");
+	textureMgr->loadTexture(L"sandnormal", L"res/sandnormal.png");
 	textureMgr->loadTexture(L"terrainHeight", L"res/heightmap.png");
 	textureMgr->loadTexture(L"water", L"res/water2.jpg");
 	textureMgr->loadTexture(L"grass", L"res/grass.png");
+	textureMgr->loadTexture(L"grassnormal", L"res/grassnormal.png");
 	textureMgr->loadTexture(L"waterMap1", L"res/waterheightmap/0.png");
 	textureMgr->loadTexture(L"waterMap2", L"res/waterheightmap/1.png");
 	textureMgr->loadTexture(L"planks", L"res/planks.png");
 	textureMgr->loadTexture(L"planksnormal", L"res/planksnormal.png");
 	textureMgr->loadTexture(L"bronze", L"res/bronze.png");
 	textureMgr->loadTexture(L"bronzenormal", L"res/bronzenormal.png");
+	textureMgr->loadTexture(L"skytex", L"res/skytex.png");
+	textureMgr->loadTexture(L"stool", L"res/stool.png");
+	textureMgr->loadTexture(L"stoolnormal", L"res/stoolnormal.png");
 
 	lightShader = new LightShader(renderer->getDevice(), hwnd);
-	terrainShader = new TerrainShader(renderer->getDevice(), hwnd);
 	waterShader = new WaterShader(renderer->getDevice(), hwnd);
 	depthShader = new DepthShader(renderer->getDevice(), hwnd);
 	textureShader = new TextureShader(renderer->getDevice(), hwnd);
 	terrainDepthShader = new TerrainDepthShader(renderer->getDevice(), hwnd);
 	drunkShader = new DrunkShader(renderer->getDevice(), hwnd);
 	terrainTessellationShader = new TerrainTessellationShader(renderer->getDevice(), hwnd);
+	waterTessellationShader = new WaterTessellationShader(renderer->getDevice(), hwnd);
+	skyShader = new SkyShader(renderer->getDevice(), hwnd);
 
 	// Variables for defining shadow map
 	int shadowmapWidth = 4096;
@@ -65,10 +65,10 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	//directional light
 	lights[0] = new Light();
-	lights[0]->setAmbientColour(0.5f, 0.5f, 0.5f, 1.0f);
-	lights[0]->setDiffuseColour(1.f, 1.0f, 1.0f, 1.0f);
-	lights[0]->setDirection(1.f, -1.f, 1.f);
-	lights[0]->setPosition(-0.25f, 30.f, 0.f);
+	lights[0]->setAmbientColour(0.075f, 0.075f, 0.15f, 1.0f);
+	lights[0]->setDiffuseColour(0.2f, 0.2f, 0.25f, 1.0f);
+	lights[0]->setDirection(0.5f, -1.f, 0.5f);
+	lights[0]->setPosition(0.f, 100.f, 0.f);
 	lights[0]->setConeAngle(0.f);
 
 	lights[1] = new Light();
@@ -94,7 +94,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 		if (lights[i]->getConeAngle() == 0) {
-			lights[i]->generateOrthoMatrix(sceneWidth, sceneHeight, 0.1, 200);
+			lights[i]->generateOrthoMatrix(sceneWidth, sceneHeight, 0.1, 400);
 
 			shadowMaps[i] = new ShadowMap(renderer->getDevice(), shadowmapWidth*4, shadowmapHeight*4);
 
@@ -108,6 +108,9 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	}
 
+	cameraDepth = new ShadowMap(renderer->getDevice(),screenWidth, screenHeight);
+
+	tessAmount = 16;
 
 }
 
@@ -118,11 +121,7 @@ App1::~App1()
 	BaseApplication::~BaseApplication();
 
 	// Release the Direct3D object.
-	if (terrain)
-	{
-		delete terrain;
-		terrain = 0;
-	}
+
 
 	if (water)
 	{
@@ -134,12 +133,6 @@ App1::~App1()
 	{
 		delete lightShader;
 		lightShader = 0;
-	}
-
-	if (terrainShader)
-	{
-		delete terrainShader;
-		terrainShader = 0;
 	}
 }
 
@@ -170,7 +163,7 @@ bool App1::render()
 {
 	depthPass();
 	firstPass();
-	//finalPass();
+	finalPass();
 
 	return true;
 }
@@ -181,33 +174,39 @@ void App1::depthPass()
 	//loop for how many lights we have in the scene
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 
+		XMMATRIX lightProjectionMatrix;
+		XMMATRIX lightViewMatrix;
+
+		
+
 		//set the current light's shadowmap to be the render target
 		shadowMaps[i]->BindDsvAndSetNullRenderTarget(renderer->getDeviceContext());
-		
-		//generate view matrix for current light
+
+			//generate view matrix for current light
 		lights[i]->generateViewMatrix();
-		
-		XMMATRIX lightProjectionMatrix;
+
+			
 
 		//if light doesn't have a cone angle, use ortho matrix, else update and get projection matrix
 		if (lights[i]->getConeAngle() == 0) {
-			lightProjectionMatrix = lights[i]->getOrthoMatrix(); 
+			lightProjectionMatrix = lights[i]->getOrthoMatrix();
 		}
 		else {
-			lights[i]->generateProjectionMatrix(0.1,10);
+			lights[i]->generateProjectionMatrix(0.1, 10);
 			lightProjectionMatrix = lights[i]->getProjectionMatrix();
 		}
 
 
 		//get matrices
-		XMMATRIX lightViewMatrix = lights[i]->getViewMatrix();
+		lightViewMatrix = lights[i]->getViewMatrix();
+		
 		XMMATRIX worldMatrix = renderer->getWorldMatrix();
 
 
 		//render the world
-		//terrain->sendData(renderer->getDeviceContext());
-		//terrainDepthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixScaling(0.1f, 1.f, 0.1f), lightViewMatrix, lightProjectionMatrix, textureMgr->getTexture(L"terrainHeight"));
-		//terrainDepthShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
+		terrain->sendData(renderer->getDeviceContext());
+		terrainDepthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix, textureMgr->getTexture(L"terrainHeight"),tessAmount);
+		terrainDepthShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
 
 		beachHut->sendData(renderer->getDeviceContext());
 		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 55.f), lightViewMatrix, lightProjectionMatrix);
@@ -249,20 +248,37 @@ void App1::depthPass()
 		renderer->setBackBufferRenderTarget();
 		renderer->resetViewport();
 	}
+
+	camera->update();
+	//set the current light's shadowmap to be the render target
+	cameraDepth->BindDsvAndSetNullRenderTarget(renderer->getDeviceContext());
+
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+
+	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
+	worldMatrix = renderer->getWorldMatrix();
+	viewMatrix = camera->getViewMatrix();
+	projectionMatrix = renderer->getProjectionMatrix();
+
+	terrain->sendData(renderer->getDeviceContext());
+	terrainDepthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"terrainHeight"), tessAmount);
+	terrainDepthShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
+
+	renderer->setBackBufferRenderTarget();
+	renderer->resetViewport();
 }
 
 void App1::firstPass()
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 
-	// Clear the scene. (default blue colour)
-	//sceneTexture->setRenderTarget(renderer->getDeviceContext());
-	//sceneTexture->clearRenderTarget(renderer->getDeviceContext(),0.f,0.f,0.f, 1.0f);
+	//Clear the scene. (default blue colour)
+	sceneTexture->setRenderTarget(renderer->getDeviceContext());
+	sceneTexture->clearRenderTarget(renderer->getDeviceContext(),0.f,0.f,0.f, 1.0f);
 
-	renderer->beginScene(0.39f, 0.58f, 0.92f, 1.0f);
+	//renderer->beginScene(0.39f, 0.58f, 0.92f, 1.0f);
 
-	// Generate the view matrix based on the camera's position.
-	camera->update();
+
 
 
 	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
@@ -270,19 +286,19 @@ void App1::firstPass()
 	viewMatrix = camera->getViewMatrix();
 	projectionMatrix = renderer->getProjectionMatrix();
 
-	//render the terrain using the terrain shader I created
-	//terrain->sendData(renderer->getDeviceContext());
-	//terrainShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixScaling(0.1f, 1.f, 0.1f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"grass"), textureMgr->getTexture(L"terrainHeight"), shadowMaps,lights);
-	//terrainShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
+	renderer->setZBuffer(false);
+	cube->sendData(renderer->getDeviceContext());
+	skyShader->setShaderParameters(renderer->getDeviceContext(),worldMatrix *XMMatrixRotationZ(3.14/2) *XMMatrixTranslation(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z), viewMatrix, projectionMatrix, textureMgr->getTexture(L"skytex"));
+	skyShader->render(renderer->getDeviceContext(), cube->getIndexCount());
+	renderer->setZBuffer(true);
 
-	newTerrain->sendData(renderer->getDeviceContext());
-	terrainTessellationShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, 64);
-	terrainTessellationShader->render(renderer->getDeviceContext(), newTerrain->getIndexCount());
+	terrain->sendData(renderer->getDeviceContext());
+	terrainTessellationShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, tessAmount,textureMgr->getTexture(L"sand"), textureMgr->getTexture(L"grass"), textureMgr->getTexture(L"sandnormal"), textureMgr->getTexture(L"grassnormal"), textureMgr->getTexture(L"terrainHeight"), shadowMaps, lights,cameraDepth);
+	terrainTessellationShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
 
-	//render the water using the water shader I created
-	//water->sendData(renderer->getDeviceContext());
-	//waterShader->setShaderParameters(renderer->getDeviceContext(), (worldMatrix*XMMatrixScaling(0.25f, 1.f, 0.25f))* XMMatrixTranslation(-400,0,-400), viewMatrix, projectionMatrix, textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"),  lights, elapsedTime);
-	//waterShader->render(renderer->getDeviceContext(), water->getIndexCount());
+	water->sendData(renderer->getDeviceContext());
+	waterTessellationShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(-400.f, 0.f, -400.f), viewMatrix, projectionMatrix, tessAmount,textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"),elapsedTime, lights);
+	waterTessellationShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	beachHut->sendData(renderer->getDeviceContext());
 	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(50.f, 11.75f, 55.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
@@ -301,23 +317,23 @@ void App1::firstPass()
 	lightShader->render(renderer->getDeviceContext(), light->getIndexCount());
 
 	stool->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 55.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 55.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"stool"), textureMgr->getTexture(L"stoolnormal"), shadowMaps, lights);
 	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
 
 	stool->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 53.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 53.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"stool"), textureMgr->getTexture(L"stoolnormal"), shadowMaps, lights);
 	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
 
 	stool->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 57.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 57.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"stool"), textureMgr->getTexture(L"stoolnormal"), shadowMaps, lights);
 	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
 
 	stool->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 56.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 56.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"stool"), textureMgr->getTexture(L"stoolnormal"), shadowMaps, lights);
 	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
 
 	stool->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 54.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"planks"), textureMgr->getTexture(L"planksnormal"), shadowMaps, lights);
+	lightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(47.5f, 11.6f, 54.f), viewMatrix, projectionMatrix, textureMgr->getTexture(L"stool"), textureMgr->getTexture(L"stoolnormal"), shadowMaps, lights);
 	lightShader->render(renderer->getDeviceContext(), stool->getIndexCount());
 
 	
@@ -333,9 +349,8 @@ void App1::firstPass()
 	
 
 	// Render GUI
-	//renderer->setBackBufferRenderTarget();
-	gui();
-	renderer->endScene();
+	renderer->setBackBufferRenderTarget();
+	//renderer->endScene();
 
 }
 
@@ -371,10 +386,12 @@ void App1::gui()
 
 	// Build UI
 	ImGui::Text("FPS: %.2f", timer->getFPS());
-	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
+	//ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 	ImGui::Text("Press E to raise camera \nto see the plane being rendered");
 
 	ImGui::Checkbox("Drunk", &drunk);
+	
+	ImGui::SliderInt("Manual Tesselation", &tessAmount, 2, 64);
 
 	// Render UI
 	ImGui::Render();

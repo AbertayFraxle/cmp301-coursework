@@ -3,7 +3,7 @@
 
 TerrainDepthShader::TerrainDepthShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"terraindepth_vs.cso", L"terraindepth_ps.cso");
+	initShader(L"terraindepth_vs.cso", L"terraindepth_hs.cso", L"terraindepth_ds.cso", L"terraindepth_ps.cso");
 }
 
 TerrainDepthShader::~TerrainDepthShader()
@@ -26,13 +26,19 @@ TerrainDepthShader::~TerrainDepthShader()
 	BaseShader::~BaseShader();
 }
 
-void  TerrainDepthShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
+void TerrainDepthShader::initShader(const wchar_t* vs, const wchar_t* ps)
+{
+}
+
+void  TerrainDepthShader::initShader(const wchar_t* vsFilename, const wchar_t* hsFilename, const wchar_t* dsFilename, const wchar_t* psFilename)
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
+	loadHullShader(hsFilename);
+	loadDomainShader(dsFilename);
 	loadPixelShader(psFilename);
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
@@ -55,11 +61,20 @@ void  TerrainDepthShader::initShader(const wchar_t* vsFilename, const wchar_t* p
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	renderer->CreateSamplerState(&samplerDesc, &sampleState);
+	
+	D3D11_BUFFER_DESC tesselationBufferDesc;
+	tesselationBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	tesselationBufferDesc.ByteWidth = sizeof(TesselationBufferType);
+	tesselationBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	tesselationBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	tesselationBufferDesc.MiscFlags = 0;
+	tesselationBufferDesc.StructureByteStride = 0;
 
+	renderer->CreateBuffer(&tesselationBufferDesc, NULL, &tesselationBuffer);
 
 }
 
-void  TerrainDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* heightmap)
+void  TerrainDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* heightmap, int tessAmount)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
@@ -76,8 +91,14 @@ void  TerrainDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
 	deviceContext->Unmap(matrixBuffer, 0);
-	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+	deviceContext->DSSetConstantBuffers(0, 1, &matrixBuffer);
 
-	deviceContext->VSSetShaderResources(0, 1, &heightmap);
-	deviceContext->VSSetSamplers(0, 1, &sampleState);
+	deviceContext->Map(tesselationBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	TesselationBufferType* tessPtr = (TesselationBufferType*)mappedResource.pData;
+	tessPtr->tesselationAmount.x = tessAmount;
+	deviceContext->Unmap(tesselationBuffer, 0);
+	deviceContext->HSSetConstantBuffers(0, 1, &tesselationBuffer);
+
+	deviceContext->DSSetShaderResources(0, 1, &heightmap);
+	deviceContext->DSSetSamplers(0, 1, &sampleState);
 }

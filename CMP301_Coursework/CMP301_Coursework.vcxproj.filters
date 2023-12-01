@@ -55,6 +55,30 @@
     <FxCompile Include="terrain_tess_ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="terraindepth_ds.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="terraindepth_hs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="water_tess_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="water_tess_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="water_tess_ds.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="water_tess_hs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="sky_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="sky_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -90,6 +114,12 @@
     <ClCompile Include="TerrainTessellationShader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="WaterTessellationShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -123,6 +153,12 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="TerrainTessellationShader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterTessellationShader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyShader.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

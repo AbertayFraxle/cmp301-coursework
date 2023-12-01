@@ -1,8 +1,16 @@
 // Tessellation Hull Shader
 // Prepares control points for tessellation
+
+#include "utils.h"
+
+Texture2D cameraDepth : register(t0);
+SamplerState shadowSampler : register(s0);
+
+
 struct InputType
 {
     float3 position : POSITION;
+    float2 tex : TEXCOORD0;
     float4 colour : COLOR;
 };
 
@@ -15,28 +23,55 @@ struct ConstantOutputType
 struct OutputType
 {
     float3 position : POSITION;
+    float2 tex : TEXCOORD0;
     float4 colour : COLOR;
 };
 
 cbuffer TesselationBuffer : register(b0)
 {
     int4 tessellationFactor;
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
 };
+
+float2 getProjectiveCoords(float4 lightViewPosition)
+{
+    float2 projTex = lightViewPosition.xy / lightViewPosition.w;
+    
+    projTex *= float2(0.5, -0.5);
+    projTex += float2(0.5f, 0.5f);
+    
+    return projTex;
+}
 
 ConstantOutputType PatchConstantFunction(InputPatch<InputType, 4> inputPatch, uint patchId : SV_PrimitiveID)
 {
     ConstantOutputType output;
 
+    int tessFactor;
+    
+    float4 rPosition;
+    
+    rPosition = mul(float4(inputPatch[patchId].position, 1), worldMatrix);
+    rPosition = mul(rPosition, viewMatrix);
+    rPosition = mul(rPosition, projectionMatrix);
+    
+    float2 projCoords = getProjectiveCoords(rPosition);
 
+    float level = (1 - cameraDepth.SampleLevel(shadowSampler, projCoords, 0))1;
+    
+    tessFactor = tessellationFactor.x *level;
+        
     // Set the tessellation factors for the three edges of the triangle.
-    output.edges[0] = tessellationFactor.x;
-    output.edges[1] = tessellationFactor.x;
-    output.edges[2] = tessellationFactor.x;
-    output.edges[3] = tessellationFactor.x;
+    output.edges[0] = tessFactor;
+    output.edges[1] = tessFactor;
+    output.edges[2] = tessFactor;
+    output.edges[3] = tessFactor;
 
     // Set the tessellation factor for tessallating inside the triangle.
-    output.inside[0] = tessellationFactor.x;
-    output.inside[1] = tessellationFactor.x;
+    output.inside[0] = tessFactor;
+    output.inside[1] = tessFactor;
 
     return output;
 }
@@ -51,9 +86,10 @@ OutputType main(InputPatch<InputType, 4> patch, uint pointId : SV_OutputControlP
 {
     OutputType output;
 
-
     // Set the position for this control point as the output position.
     output.position = patch[pointId].position;
+    
+    output.tex = patch[pointId].tex;
 
     // Set the input colour as the output colour.
     output.colour = patch[pointId].colour;

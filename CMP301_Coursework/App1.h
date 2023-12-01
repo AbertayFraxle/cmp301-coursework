@@ -5,7 +5,6 @@
 // Includes
 #include "DXF.h"	// include dxframework
 #include "LightShader.h"
-#include "TerrainShader.h"
 #include "WaterShader.h"
 #include "TextureShader.h"
 #include "TessellationPlane.h"
@@ -13,6 +12,8 @@
 #include "TerrainDepthShader.h"
 #include "DrunkShader.h"
 #include "TerrainTessellationShader.h"
+#include "WaterTessellationShader.h"
+#include "SkyShader.h"
 
 
 class App1 : public BaseApplication
@@ -40,12 +41,10 @@ private:
 	
 	bool drunk;
 
-	PlaneMesh* terrain;
-	PlaneMesh* water;
+	TessellationPlane* terrain;
+	TessellationPlane* water;
 
-	TessellationPlane* newTerrain;
-
-	CubeMesh* cube;
+	AModel* cube;
 	SphereMesh* debugSphere;
 
 	AModel* beachHut;
@@ -55,9 +54,6 @@ private:
 	RenderTexture* sceneTexture;
 	OrthoMesh* playerView;
 
-	//TessellationPlane* water;
-
-	TerrainShader* terrainShader;
 	LightShader* lightShader;
 	WaterShader* waterShader;
 	DepthShader* depthShader;
@@ -65,13 +61,19 @@ private:
 	TerrainDepthShader* terrainDepthShader;
 	DrunkShader* drunkShader;
 	TerrainTessellationShader* terrainTessellationShader;
+	WaterTessellationShader* waterTessellationShader;
+	SkyShader* skyShader;
 
 	Light* lights[LIGHTCOUNT];
 	ShadowMap* shadowMaps[LIGHTCOUNT];
 
+	ShadowMap* cameraDepth;
+
 	float debuglightPos[3];
 
 	float elapsedTime;
+
+	int tessAmount;
 };
 
 #endif
