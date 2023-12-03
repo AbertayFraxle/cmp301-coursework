@@ -3,7 +3,6 @@
 
 #include "utils.h"
 
-Texture2D cameraDepth : register(t0);
 SamplerState shadowSampler : register(s0);
 
 
@@ -33,6 +32,7 @@ cbuffer TesselationBuffer : register(b0)
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
+    float4 cameraPos;
 };
 
 float2 getProjectiveCoords(float4 lightViewPosition)
@@ -51,17 +51,27 @@ ConstantOutputType PatchConstantFunction(InputPatch<InputType, 4> inputPatch, ui
 
     int tessFactor;
     
-    float4 rPosition;
+   // float4 rPosition;
     
-    rPosition = mul(float4(inputPatch[patchId].position, 1), worldMatrix);
-    rPosition = mul(rPosition, viewMatrix);
-    rPosition = mul(rPosition, projectionMatrix);
+   // rPosition = mul(float4(inputPatch[patchId].position, 1), worldMatrix);
+   // rPosition = mul(rPosition, viewMatrix);
+   // rPosition = mul(rPosition, projectionMatrix);
     
-    float2 projCoords = getProjectiveCoords(rPosition);
+    
+   // float2 diff = (cameraPos-rPosition).xz;
+    
+   // float len = length(diff);
+   // if (len >= 10)
+  //  {
+        tessFactor = tessellationFactor.x;
+  //  }
+  //  else
+  //  {
+   //     tessFactor = 2;
 
-    float level = (1 - cameraDepth.SampleLevel(shadowSampler, projCoords, 0))1;
+  //  }
     
-    tessFactor = tessellationFactor.x *level;
+        
         
     // Set the tessellation factors for the three edges of the triangle.
     output.edges[0] = tessFactor;

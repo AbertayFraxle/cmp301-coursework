@@ -17,7 +17,7 @@ public:
 	TerrainTessellationShader(ID3D11Device* device, HWND hwnd);
 	~TerrainTessellationShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* lowNorm, ID3D11ShaderResourceView* highNorm, ID3D11ShaderResourceView* heightmap, ShadowMap* shadowMap[LIGHTCOUNT], Light* lights[LIGHTCOUNT], ShadowMap* cameraDepth);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* lowNorm, ID3D11ShaderResourceView* highNorm, ID3D11ShaderResourceView* heightmap, ShadowMap* shadowMap[LIGHTCOUNT], Light* lights[LIGHTCOUNT], Camera* camera);
 
 private:
 
@@ -46,6 +46,7 @@ private:
 		XMMATRIX world;
 		XMMATRIX view;
 		XMMATRIX projection;
+		XMFLOAT4 camPos;
 	};
 
 	void initShader(const wchar_t* vsFilename, const wchar_t* psFilename);

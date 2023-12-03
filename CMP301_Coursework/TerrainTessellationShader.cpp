@@ -98,7 +98,7 @@ void TerrainTessellationShader::initShader(const wchar_t* vsFilename, const wcha
 }
 
 
-void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* lowNorm, ID3D11ShaderResourceView* highNorm, ID3D11ShaderResourceView* heightmap, ShadowMap* shadowMap[LIGHTCOUNT],Light * lights[LIGHTCOUNT],ShadowMap* cameraDepth)
+void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* lowNorm, ID3D11ShaderResourceView* highNorm, ID3D11ShaderResourceView* heightmap, ShadowMap* shadowMap[LIGHTCOUNT],Light * lights[LIGHTCOUNT], Camera* camera)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -148,6 +148,7 @@ void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceC
 	tessPtr->world = tworld;
 	tessPtr->view = tview;
 	tessPtr->projection = tproj;
+	tessPtr->camPos = XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 1);
 	deviceContext->Unmap(tesselationBuffer, 0);
 	deviceContext->HSSetConstantBuffers(0, 1, &tesselationBuffer);
 
@@ -171,10 +172,6 @@ void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceC
 	
 
 	deviceContext->DSSetSamplers(0, 1, &sampleState);
-
-	ID3D11ShaderResourceView* camD = cameraDepth->getDepthMapSRV();
-	deviceContext->HSSetShaderResources(0, 1, &camD);
-	deviceContext->HSSetSamplers(0, 1, &shadowSampleState);
 
 	deviceContext->DSSetShaderResources(0, 1, &heightmap);
 

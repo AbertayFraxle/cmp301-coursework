@@ -50,6 +50,10 @@ private:
 	AModel* beachHut;
 	AModel* light;
 	AModel* stool;
+	AModel* turtle;
+	AModel* shelf;
+	AModel* bottle1;
+	AModel* bottle2;
 
 	RenderTexture* sceneTexture;
 	OrthoMesh* playerView;

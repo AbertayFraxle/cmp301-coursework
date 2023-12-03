@@ -177,7 +177,9 @@ float4 main(InputType input) : SV_TARGET
  
     
     //multiply the light colour and the texture colour
-    return lightColour * textureColour;
+    float4 retColour = lightColour * textureColour;
+    
+    return retColour;
 }
 
 
