@@ -79,7 +79,7 @@ void DrunkShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 }
 
 
-void DrunkShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float time)
+void DrunkShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float time, float doubleVision, float intensity)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -104,7 +104,9 @@ void DrunkShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	deviceContext->Map(timeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	timePtr = (TimeBufferType*)mappedResource.pData;
 	timePtr->time = time;
-	timePtr->padding = XMFLOAT3(0, 0, 0);
+	timePtr->doubleVision = doubleVision;
+	timePtr->intensity = 1/intensity;
+	timePtr->padding = 0.f;
 	deviceContext->Unmap(timeBuffer, 0);
 	deviceContext->PSSetConstantBuffers(0, 1, &timeBuffer);
 

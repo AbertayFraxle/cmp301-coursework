@@ -11,13 +11,15 @@ public:
 	DrunkShader(ID3D11Device* device, HWND hwnd);
 	~DrunkShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* texture,float time);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, float time, float doubleVision, float intensity);
 
 private:
 	struct TimeBufferType
 	{
 		float time;
-		XMFLOAT3 padding;
+		float doubleVision;
+		float intensity;
+		float padding;
 	};
 
 

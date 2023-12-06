@@ -77,6 +77,9 @@ private:
 
 	float elapsedTime;
 
+	float doubleVision;
+	float intensity;
+
 	int tessAmount;
 };
 

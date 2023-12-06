@@ -122,6 +122,9 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	tessAmount = 16;
 
+	doubleVision = 8;
+	intensity = 0.1f;
+
 }
 
 
@@ -404,7 +407,7 @@ void App1::finalPass()
 	playerView->sendData(renderer->getDeviceContext());
 
 	if (drunk) {
-		drunkShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, camera->getOrthoViewMatrix(), sceneTexture->getOrthoMatrix(), sceneTexture->getShaderResourceView(), elapsedTime);
+		drunkShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, camera->getOrthoViewMatrix(), sceneTexture->getOrthoMatrix(), sceneTexture->getShaderResourceView(), elapsedTime,doubleVision,intensity);
 		drunkShader->render(renderer->getDeviceContext(), playerView->getIndexCount());
 	}
 	else {
@@ -431,6 +434,13 @@ void App1::gui()
 	ImGui::Text("Press E to raise camera \nto see the plane being rendered");
 
 	ImGui::Checkbox("Drunk", &drunk);
+
+
+	if (drunk) {
+		ImGui::SliderFloat("Double Vision: ",&doubleVision,1.f,16.f);
+		ImGui::SliderFloat("Intensity: ", &intensity, 0.f, 5.f);
+	}
+
 	
 	ImGui::SliderInt("Manual Tesselation", &tessAmount, 2, 64);
 
