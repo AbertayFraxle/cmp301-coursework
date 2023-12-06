@@ -106,7 +106,7 @@ void WaterTessellationShader::initShader(const wchar_t* vsFilename, const wchar_
 }
 
 
-void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2,float time, Light* lights[LIGHTCOUNT])
+void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, Light* lights[LIGHTCOUNT], Camera* camera)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -159,6 +159,8 @@ void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceCon
 		lightPtr->direction[i] = XMFLOAT4(lights[i]->getDirection().x, lights[i]->getDirection().y, lights[i]->getDirection().z, 1);
 		lightPtr->factors[i] = XMFLOAT4(0.5, 0.125, 0, 0);
 		lightPtr->coneangle[i] = XMFLOAT4(lights[i]->getConeAngle(), 0, 0, 0);
+		lightPtr->specular[i] = lights[i]->getSpecularColour();
+		lightPtr->specularPower[i] = XMFLOAT4(lights[i]->getSpecularPower(), 0, 0, 0);
 	}
 
 	deviceContext->Unmap(lightBuffer, 0);
@@ -184,7 +186,7 @@ void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceCon
 	deviceContext->Map(timeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	timePtr = (TimeBufferType*)mappedResource.pData;
 	timePtr->time = time;
-	timePtr->padding = XMFLOAT3(0, 0, 0);
+	timePtr->cameraPos = camera->getPosition();
 	deviceContext->Unmap(timeBuffer, 0);
 	deviceContext->DSSetConstantBuffers(1, 1, &timeBuffer);
 

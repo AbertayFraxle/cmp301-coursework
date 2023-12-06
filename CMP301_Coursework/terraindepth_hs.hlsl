@@ -50,7 +50,7 @@ ConstantOutputType PatchConstantFunction(InputPatch<InputType, 4> inputPatch, ui
     float4 rPos11 = mul(float4(inputPatch[2].position, 1), worldMatrix);
     rPos11 = mul(rPos11, viewMatrix);
 
-    const float MIN_DISTANCE = 10;
+    const float MIN_DISTANCE = 00;
     const float MAX_DISTANCE = 50;
     const int MIN_TESS = 2;
     const int MAX_TESS = 64;

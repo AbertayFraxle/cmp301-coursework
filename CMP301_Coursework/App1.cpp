@@ -80,6 +80,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	lights[0]->setDirection(0.5f, -1.f, 0.5f);
 	lights[0]->setPosition(0.f, 100.f, 0.f);
 	lights[0]->setConeAngle(0.f);
+	lights[0]->setSpecularColour(1, 1, 1, 1);
+	lights[0]->setSpecularPower(500);
 
 	lights[1] = new Light();
 	lights[1]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
@@ -87,6 +89,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	lights[1]->setPosition(48.325f, 14.1f, 55.f);
 	lights[1]->setDirection(-0.1f, -1.f, 0.f);
 	lights[1]->setConeAngle(15.f);
+	lights[1]->setSpecularColour(0, 1, 1, 1);
+	lights[1]->setSpecularPower(100);
 
 	lights[2] = new Light();
 	lights[2]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
@@ -94,6 +98,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	lights[2]->setPosition(48.325f, 14.1f, 57.f);
 	lights[2]->setDirection(-0.1f, -1.f, 0.f);
 	lights[2]->setConeAngle(15.f);
+	lights[2]->setSpecularColour(0, 1, 1, 1);
+	lights[2]->setSpecularPower(100);
 
 	lights[3] = new Light();
 	lights[3]->setAmbientColour(0.0f, 0.0f, 0.0f, 1.0f);
@@ -101,6 +107,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	lights[3]->setPosition(48.325f, 14.1f, 53.f);
 	lights[3]->setDirection(-0.1f, -1.f, 0.f);
 	lights[3]->setConeAngle(15.f);
+	lights[3]->setSpecularColour(0, 1, 1, 1);
+	lights[3]->setSpecularPower(100);
 
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 		if (lights[i]->getConeAngle() == 0) {
@@ -319,7 +327,7 @@ void App1::firstPass()
 	terrainTessellationShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
 
 	water->sendData(renderer->getDeviceContext());
-	waterTessellationShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(-400.f, 0.f, -400.f), viewMatrix, projectionMatrix, tessAmount,textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"),elapsedTime, lights);
+	waterTessellationShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(-400.f, 0.f, -400.f), viewMatrix, projectionMatrix, tessAmount,textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"),elapsedTime, lights,camera);
 	waterTessellationShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	beachHut->sendData(renderer->getDeviceContext());

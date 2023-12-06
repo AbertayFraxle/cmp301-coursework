@@ -23,6 +23,7 @@ cbuffer MatrixBuffer : register(b0)
 cbuffer TimeBuffer : register(b1)
 {
     float time;
+    float3 cameraPos;
 }
 
 struct ConstantOutputType
@@ -45,6 +46,7 @@ struct OutputType
     float3 normal : NORMAL;
     float3 worldPosition : TEXCOORD1;
     float4 lightViewPos[LIGHTCOUNT] : TEXCOORD2;
+    float3 viewVector : JEFF;
 };
 
 [domain("quad")]
@@ -121,6 +123,9 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
     
     output.worldPosition = mul(float4(vertexPosition, 1.0f), worldMatrix).xyz;
 
+    output.viewVector = cameraPos - output.worldPosition.xyz;
+    output.viewVector = normalize(output.viewVector);
+    
     return output;
 }
 
