@@ -46,8 +46,9 @@ private:
 
 	struct TesselationBufferType {
 		XMINT4 tesselationAmount;
+		XMMATRIX world;
+		XMMATRIX view;
 	};
-
 	void initShader(const wchar_t* vsFilename, const wchar_t* psFilename);
 	void initShader(const wchar_t* vsFilename, const wchar_t* hsFilename, const wchar_t* dsFilename, const wchar_t* psFilename);
 

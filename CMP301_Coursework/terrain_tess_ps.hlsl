@@ -64,6 +64,8 @@ bool hasDepthData(float2 uv)
 
 bool isInShadow(Texture2D sMap, float2 uv, float4 lightViewPosition, float bias)
 {
+
+
     float depthValue = sMap.Sample(shadowSampler, uv).r;
     
     float lightDepthValue = lightViewPosition.z / lightViewPosition.w;

@@ -76,7 +76,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	//directional light
 	lights[0] = new Light();
 	lights[0]->setAmbientColour(0.075f, 0.075f, 0.15f, 1.0f);
-	lights[0]->setDiffuseColour(0.2f, 0.2f, 0.25f, 1.0f);
+	lights[0]->setDiffuseColour(0.3f, 0.3f, 0.4f, 1.0f);
 	lights[0]->setDirection(0.5f, -1.f, 0.5f);
 	lights[0]->setPosition(0.f, 100.f, 0.f);
 	lights[0]->setConeAngle(0.f);

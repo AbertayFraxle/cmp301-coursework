@@ -112,13 +112,6 @@ void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceC
 	XMMATRIX tview = XMMatrixTranspose(viewMatrix);
 	XMMATRIX tproj = XMMatrixTranspose(projectionMatrix);
 
-	// Transpose the matrices to prepare them for the shader.
-	tworld = XMMatrixTranspose(worldMatrix);
-	tview = XMMatrixTranspose(viewMatrix);
-	tproj = XMMatrixTranspose(projectionMatrix);
-
-
-
 	result = deviceContext->Map(matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 	dataPtr->world = tworld;// worldMatrix;
@@ -147,8 +140,6 @@ void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceC
 	tessPtr->tesselationAmount.x = tessAmount;
 	tessPtr->world = tworld;
 	tessPtr->view = tview;
-	tessPtr->projection = tproj;
-	tessPtr->camPos = XMFLOAT4(camera->getPosition().x, camera->getPosition().y, camera->getPosition().z, 1);
 	deviceContext->Unmap(tesselationBuffer, 0);
 	deviceContext->HSSetConstantBuffers(0, 1, &tesselationBuffer);
 

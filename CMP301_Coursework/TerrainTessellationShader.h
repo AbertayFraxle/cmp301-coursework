@@ -45,8 +45,6 @@ private:
 		XMINT4 tesselationAmount;
 		XMMATRIX world;
 		XMMATRIX view;
-		XMMATRIX projection;
-		XMFLOAT4 camPos;
 	};
 
 	void initShader(const wchar_t* vsFilename, const wchar_t* psFilename);

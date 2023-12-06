@@ -96,6 +96,8 @@ void  TerrainDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext
 	deviceContext->Map(tesselationBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	TesselationBufferType* tessPtr = (TesselationBufferType*)mappedResource.pData;
 	tessPtr->tesselationAmount.x = tessAmount;
+	tessPtr->world = tworld;
+	tessPtr->view = tview;
 	deviceContext->Unmap(tesselationBuffer, 0);
 	deviceContext->HSSetConstantBuffers(0, 1, &tesselationBuffer);
 
