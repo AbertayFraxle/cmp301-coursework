@@ -106,7 +106,7 @@ void WaterTessellationShader::initShader(const wchar_t* vsFilename, const wchar_
 }
 
 
-void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, Light* lights[LIGHTCOUNT], Camera* camera)
+void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, Light* lights[LIGHTCOUNT], Camera* camera, ShadowMap* shadowMap[LIGHTCOUNT])
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -130,7 +130,7 @@ void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceCon
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
 
-	/*
+	
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 		XMMATRIX tLightViewMatrix = XMMatrixTranspose(lights[i]->getViewMatrix());
 		XMMATRIX tLightProjectionMatrix;
@@ -143,10 +143,9 @@ void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceCon
 		dataPtr->lightView[i] = tLightViewMatrix;
 		dataPtr->lightProjection[i] = tLightProjectionMatrix;
 	}
-	*/
+	
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->DSSetConstantBuffers(0, 1, &matrixBuffer);
-	deviceContext->PSSetConstantBuffers(1, 1, &matrixBuffer);
 
 	LightBufferType* lightPtr;
 	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -174,13 +173,17 @@ void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceCon
 	tessPtr->view = tview;
 	deviceContext->Unmap(tesselationBuffer, 0);
 	deviceContext->HSSetConstantBuffers(0, 1, &tesselationBuffer);
-	//for (int i = 0; i < LIGHTCOUNT; i++) {
-	//	ID3D11ShaderResourceView* map = shadowMap[i]->getDepthMapSRV();
-//
-//		deviceContext->PSSetShaderResources(2 + i, 1, &map);
-//	}
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext->PSSetShaderResources(0, 1, &waterTex);
+
+	for (int i = 0; i < LIGHTCOUNT; i++) {
+		ID3D11ShaderResourceView* map = shadowMap[i]->getDepthMapSRV();
+
+		deviceContext->PSSetShaderResources(1 + i, 1, &map);
+	}
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
-//	deviceContext->PSSetSamplers(1, 1, &shadowSampleState);
+	deviceContext->PSSetSamplers(1, 1, &shadowSampleState);
 
 	TimeBufferType* timePtr;
 	deviceContext->Map(timeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -190,9 +193,6 @@ void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceCon
 	deviceContext->Unmap(timeBuffer, 0);
 	deviceContext->DSSetConstantBuffers(1, 1, &timeBuffer);
 
-	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &waterTex);
-	deviceContext->PSSetSamplers(0, 1, &sampleState);
 
 	deviceContext->DSSetShaderResources(0, 1, &heightmap1);
 	deviceContext->DSSetShaderResources(1, 1, &heightmap2);

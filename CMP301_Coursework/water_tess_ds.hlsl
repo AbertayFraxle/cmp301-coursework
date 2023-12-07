@@ -18,6 +18,8 @@ cbuffer MatrixBuffer : register(b0)
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
+    matrix lightViewMatrix[LIGHTCOUNT];
+    matrix lightProjectionMatrix[LIGHTCOUNT];
 };
 
 cbuffer TimeBuffer : register(b1)
@@ -110,13 +112,13 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
 
-  //  for (int i = 0; i < LIGHTCOUNT; i++)
-//    {
- //       output.lightViewPos[i] = mul(float4(vertexPosition, 1.0f), worldMatrix);
- //       output.lightViewPos[i] = mul(output.lightViewPos[i], lightViewMatrix[i]);
- //       output.lightViewPos[i] = mul(output.lightViewPos[i], lightProjectionMatrix[i]);
+   for (int i = 0; i < LIGHTCOUNT; i++)
+    {
+        output.lightViewPos[i] = mul(float4(vertexPosition, 1.0f), worldMatrix);
+        output.lightViewPos[i] = mul(output.lightViewPos[i], lightViewMatrix[i]);
+        output.lightViewPos[i] = mul(output.lightViewPos[i], lightProjectionMatrix[i]);
         
- //   }
+   }
     
     // Send the input color into the pixel shader.
     output.tex = texPosition * TILING;

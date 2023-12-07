@@ -38,6 +38,7 @@ ConstantOutputType PatchConstantFunction(InputPatch<InputType, 4> inputPatch, ui
 
     float tessFactor;
 
+    //cast the positions of the 4 control points in the patch to view space
     float4 rPos00 = mul(float4(inputPatch[0].position, 1), worldMatrix);
     rPos00 = mul(rPos00, viewMatrix);
 
@@ -50,18 +51,19 @@ ConstantOutputType PatchConstantFunction(InputPatch<InputType, 4> inputPatch, ui
     float4 rPos11 = mul(float4(inputPatch[2].position, 1), worldMatrix);
     rPos11 = mul(rPos11, viewMatrix);
 
+    //define the distances for tesselation to occur, and the range of the tesselation to occur
     const float MIN_DISTANCE = 00;
     const float MAX_DISTANCE = 50;
     const int MIN_TESS = 2;
     const int MAX_TESS = 64;
 
-
+    //get the distance from the casted position and clamp it between 0 and 1
     float dist00 = clamp((abs(rPos00.z) - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0.0, 1.0);
     float dist01 = clamp((abs(rPos01.z) - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0.0, 1.0);
     float dist10 = clamp((abs(rPos10.z) - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0.0, 1.0);
     float dist11 = clamp((abs(rPos11.z) - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0.0, 1.0);
 
-
+    //determine what tesselation values to use by using distance values and specified range of tesselation
     float tessLevel0 = lerp(MAX_TESS, MIN_TESS, min(dist10, dist00));
     float tessLevel1 = lerp(MAX_TESS, MIN_TESS, min(dist00, dist01));
     float tessLevel2 = lerp(MAX_TESS, MIN_TESS, min(dist01, dist11));

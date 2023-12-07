@@ -61,12 +61,13 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	terrainTessellationShader = new TerrainTessellationShader(renderer->getDevice(), hwnd);
 	waterTessellationShader = new WaterTessellationShader(renderer->getDevice(), hwnd);
 	skyShader = new SkyShader(renderer->getDevice(), hwnd);
+	waterDepthShader = new WaterDepthShader(renderer->getDevice(), hwnd);
 
 	// Variables for defining shadow map
 	int shadowmapWidth = 4096;
 	int shadowmapHeight = 4096;
-	int sceneWidth = 120;
-	int sceneHeight = 120;
+	int sceneWidth = 400;
+	int sceneHeight = 400;
 
 	// This is your shadow map
 	
@@ -273,6 +274,10 @@ void App1::depthPass()
 		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixRotationX(3.14 / 2) * XMMatrixScaling(0.15, 0.15, 0.15) * XMMatrixTranslation(47.5f, 12.62f, 54.f), lightViewMatrix, lightProjectionMatrix);
 		depthShader->render(renderer->getDeviceContext(), turtle->getIndexCount());
 
+		water->sendData(renderer->getDeviceContext());
+		waterDepthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(-400.f, 0.f, -400.f), lightViewMatrix, lightProjectionMatrix, textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"), 0, elapsedTime);
+		waterDepthShader->render(renderer->getDeviceContext(), water->getIndexCount());
+
 		//reset
 		renderer->setBackBufferRenderTarget();
 		renderer->resetViewport();
@@ -327,7 +332,7 @@ void App1::firstPass()
 	terrainTessellationShader->render(renderer->getDeviceContext(), terrain->getIndexCount());
 
 	water->sendData(renderer->getDeviceContext());
-	waterTessellationShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(-400.f, 0.f, -400.f), viewMatrix, projectionMatrix, tessAmount,textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"),elapsedTime, lights,camera);
+	waterTessellationShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix * XMMatrixTranslation(-400.f, 0.f, -400.f), viewMatrix, projectionMatrix, tessAmount,textureMgr->getTexture(L"water"), textureMgr->getTexture(L"waterMap1"), textureMgr->getTexture(L"waterMap2"),elapsedTime, lights,camera,shadowMaps);
 	waterTessellationShader->render(renderer->getDeviceContext(), water->getIndexCount());
 
 	beachHut->sendData(renderer->getDeviceContext());

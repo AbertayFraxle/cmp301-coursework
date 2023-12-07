@@ -14,6 +14,7 @@
 #include "TerrainTessellationShader.h"
 #include "WaterTessellationShader.h"
 #include "SkyShader.h"
+#include "WaterDepthShader.h"
 
 
 class App1 : public BaseApplication
@@ -67,6 +68,7 @@ private:
 	TerrainTessellationShader* terrainTessellationShader;
 	WaterTessellationShader* waterTessellationShader;
 	SkyShader* skyShader;
+	WaterDepthShader* waterDepthShader;
 
 	Light* lights[LIGHTCOUNT];
 	ShadowMap* shadowMaps[LIGHTCOUNT];
