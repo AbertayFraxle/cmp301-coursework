@@ -48,7 +48,7 @@ struct OutputType
     float3 normal : NORMAL;
     float3 worldPosition : TEXCOORD1;
     float4 lightViewPos[LIGHTCOUNT] : TEXCOORD2;
-    float3 viewVector : JEFF;
+    float3 viewVector : VIEWVEC;
 };
 
 [domain("quad")]
@@ -59,6 +59,8 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
 
     OutputType output;
 
+    //get vertex position and texcoord by interpolating patch positions and using uvwcoord
+    
     float3 v1 = lerp(patch[0].position, patch[1].position, uvwCoord.y);
     float3 v2 = lerp(patch[3].position, patch[2].position, uvwCoord.y);
 
@@ -69,12 +71,15 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
     
     texPosition = lerp(t1, t2, uvwCoord.x);
     
+    //offset found uv coord by time value for scrolling
     float2 tex0 = texPosition * (1.5 * TILING) + float2(time * TIMESCALE, -time * TIMESCALE);
     float2 tex1 = texPosition * TILING + float2(-time * TIMESCALE, -time * TIMESCALE);
     
+    //sample two different heightmaps to get wave illusion
     float4 sample0 = heightMap0.SampleLevel(sampler0, tex0, 0) * WAVESCALE;
     float4 sample1 = heightMap1.SampleLevel(sampler0, tex1, 0) * WAVESCALE;
     
+    //define offsets for each heightmap's UV coords
     float2 offsets0[4], offsets1[4];
     offsets0[0] = tex0 + float2(-STEPAMOUNT, 0);
     offsets0[1] = tex0 + float2(STEPAMOUNT, 0);
@@ -88,6 +93,7 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
     
     float heights0[4], heights1[4];
     
+    //sample heightmaps to determine normals, find cross product
     for (int i = 0; i < 4; i++)
     {
         heights0[i] = heightMap0.SampleLevel(sampler0, offsets0[i], 0).x;
@@ -103,8 +109,10 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
     float3 va1 = normalize(float3(step.xy, heights1[1] - heights1[0]));
     float3 vb1 = normalize(float3(step.yx, heights1[3] - heights1[2]));
 
+    //normalise combined calculated normals
     output.normal = normalize(cross(va0, vb0).xzy + cross(va1, vb1).xzy);
     
+    //sample both heightmaps and combine to find height
     vertexPosition.y = (sample0.x + sample0.y + sample0.z + sample1.x + sample1.y + sample1.z);
 
     // Calculate the position of the new vertex against the world, view, and projection matrices.

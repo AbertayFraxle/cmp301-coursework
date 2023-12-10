@@ -51,6 +51,6 @@ OutputType main(InputType input)
 	output.normal = normalize(output.normal);
 
 	output.worldPosition = mul(input.position, worldMatrix).xyz;
-
+	
 	return output;
 }

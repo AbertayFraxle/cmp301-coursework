@@ -3,7 +3,7 @@
 
 TerrainDepthShader::TerrainDepthShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"terraindepth_vs.cso", L"terraindepth_hs.cso", L"terraindepth_ds.cso", L"terraindepth_ps.cso");
+	initShader(L"terraindepth_vs.cso", L"tesselation_hs.cso", L"terraindepth_ds.cso", L"terraindepth_ps.cso");
 }
 
 TerrainDepthShader::~TerrainDepthShader()
@@ -74,7 +74,7 @@ void  TerrainDepthShader::initShader(const wchar_t* vsFilename, const wchar_t* h
 
 }
 
-void  TerrainDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* heightmap, int tessAmount)
+void  TerrainDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* heightmap, XMINT4 tessValues)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
@@ -95,7 +95,7 @@ void  TerrainDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext
 
 	deviceContext->Map(tesselationBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	TesselationBufferType* tessPtr = (TesselationBufferType*)mappedResource.pData;
-	tessPtr->tesselationAmount.x = tessAmount;
+	tessPtr->tessDistances= tessValues;
 	tessPtr->world = tworld;
 	tessPtr->view = tview;
 	deviceContext->Unmap(tesselationBuffer, 0);

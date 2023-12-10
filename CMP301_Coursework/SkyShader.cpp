@@ -90,10 +90,6 @@ void SkyShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XM
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 
-	//Additional
-	// Send light data to pixel shader
-
-
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);
 

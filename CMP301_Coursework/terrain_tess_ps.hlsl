@@ -96,7 +96,7 @@ float4 main(InputType input) : SV_TARGET
     float diff = abs(input.worldPosition.y - TEXTURECHANGE);
     
     
-    float shadowMapBias = 0.0025f;
+    float shadowMapBias = 0.001f;
 
     float3 newNorm = float3(0, 0, 0);
     

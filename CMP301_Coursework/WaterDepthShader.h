@@ -16,11 +16,11 @@ public:
 	WaterDepthShader(ID3D11Device* device, HWND hwnd);
 	~WaterDepthShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, int tessAmount, float time);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, XMINT4 tessValues);
 
 private:
 	struct TesselationBufferType {
-		XMINT4 tesselationAmount;
+		XMINT4 tessDistances;
 		XMMATRIX world;
 		XMMATRIX view;
 	};

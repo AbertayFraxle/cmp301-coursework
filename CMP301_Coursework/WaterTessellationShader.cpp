@@ -4,7 +4,7 @@
 
 WaterTessellationShader::WaterTessellationShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"water_tess_vs.cso", L"water_tess_hs.cso", L"water_tess_ds.cso", L"water_tess_ps.cso");
+	initShader(L"water_tess_vs.cso", L"tesselation_hs.cso", L"water_tess_ds.cso", L"water_tess_ps.cso");
 }
 
 
@@ -106,7 +106,7 @@ void WaterTessellationShader::initShader(const wchar_t* vsFilename, const wchar_
 }
 
 
-void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, Light* lights[LIGHTCOUNT], Camera* camera, ShadowMap* shadowMap[LIGHTCOUNT])
+void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, Light* lights[LIGHTCOUNT], Camera* camera, ShadowMap* shadowMap[LIGHTCOUNT], XMINT4 tessValues)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -130,7 +130,7 @@ void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceCon
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
 
-	
+	//pass in the right matrices for the lights to do shadows properly
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 		XMMATRIX tLightViewMatrix = XMMatrixTranspose(lights[i]->getViewMatrix());
 		XMMATRIX tLightProjectionMatrix;
@@ -168,7 +168,7 @@ void WaterTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceCon
 
 	deviceContext->Map(tesselationBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	TesselationBufferType* tessPtr = (TesselationBufferType*)mappedResource.pData;
-	tessPtr->tesselationAmount.x = tessAmount;
+	tessPtr->tessDistances = tessValues;
 	tessPtr->world = tworld;
 	tessPtr->view = tview;
 	deviceContext->Unmap(tesselationBuffer, 0);

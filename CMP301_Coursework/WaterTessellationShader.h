@@ -17,7 +17,7 @@ public:
 	WaterTessellationShader(ID3D11Device* device, HWND hwnd);
 	~WaterTessellationShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, Light* lights[LIGHTCOUNT], Camera* camera, ShadowMap* shadowMap[LIGHTCOUNT]);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* waterTex, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, Light* lights[LIGHTCOUNT], Camera* camera, ShadowMap* shadowMap[LIGHTCOUNT], XMINT4 tessValues);
 
 private:
 
@@ -49,7 +49,7 @@ private:
 	};
 
 	struct TesselationBufferType {
-		XMINT4 tesselationAmount;
+		XMINT4 tessDistances;
 		XMMATRIX world;
 		XMMATRIX view;
 	};

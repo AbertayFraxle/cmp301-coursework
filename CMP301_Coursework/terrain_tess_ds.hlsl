@@ -47,22 +47,26 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
     
     OutputType output;
 
+    //determine the vertex position by interpolating by the patches positions and the provided uvw coord
     float3 v1 = lerp(patch[0].position, patch[1].position, uvwCoord.y);
     float3 v2 = lerp(patch[3].position, patch[2].position, uvwCoord.y);
 
     vertexPosition = lerp(v1, v2, uvwCoord.x);
     
+    //determine the texcoord position by interpolating by the patches positions and the provided uvw coord
     float2 t1 = lerp(patch[0].tex, patch[1].tex, uvwCoord.y);
     float2 t2 = lerp(patch[3].tex, patch[2].tex, uvwCoord.y);
     
     texPosition = lerp(t1, t2, uvwCoord.x);
     
+    //determine the offsets to use to generate the normals of the terrain
     float2 offsets[4];
     offsets[0] = texPosition + float2(-STEPAMOUNT, 0);
     offsets[1] = texPosition + float2(STEPAMOUNT, 0);
     offsets[2] = texPosition + float2(0, -STEPAMOUNT);
     offsets[3] = texPosition + float2(0, STEPAMOUNT);
     
+    //store the heights at these offsets to current point to help find normals
     float heights[4];
     
     for (int i = 0; i < 4; i++)
@@ -72,11 +76,13 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
 
     float2 step = float2(STEPAMOUNT, 0.f);
     
+    //do a cross product of the vectors going over current vertex to determine the normal
     float3 va = normalize(float3(step.xy, heights[1] - heights[0]));
     float3 vb = normalize(float3(step.yx, heights[3] - heights[2]));
 
     output.normal = cross(va, vb).xzy;
     
+    //sample the heightmap and multiply this value by 7.5 to determine height
     float4 sample = heightMap.SampleLevel(sampler0, texPosition, 0);
     
     vertexPosition.y = (sample.x + sample.y + sample.z) * 7.5f;
@@ -86,6 +92,7 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
 
+    //cast position to light view for shadow chicanery
     for (int i = 0; i < LIGHTCOUNT; i++)
     {
         output.lightViewPos[i] = mul(float4(vertexPosition, 1.0f), worldMatrix);
@@ -94,7 +101,7 @@ OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, c
         
     }
     
-    // Send the input color into the pixel shader.
+    //multiply the texcoord by 20 for our tiling
     output.tex = texPosition * 20;
     
     output.worldPosition = mul(float4(vertexPosition, 1.0f), worldMatrix).xyz;

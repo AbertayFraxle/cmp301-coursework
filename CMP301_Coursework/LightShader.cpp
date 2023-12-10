@@ -105,6 +105,7 @@ void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
 
+	//pass in the right matrices for the lights to do shadows properly
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 		XMMATRIX tLightViewMatrix = XMMatrixTranspose(lights[i]->getViewMatrix());
 		XMMATRIX tLightProjectionMatrix;

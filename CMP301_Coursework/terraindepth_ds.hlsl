@@ -27,6 +27,9 @@ struct OutputType
     float4 depthPosition : TEXCOORD0;
 };
 
+//lifted code from normal terrain shader
+//this returns the right positions to get correct depth values when doing the pass
+
 [domain("quad")]
 OutputType main(ConstantOutputType input, float2 uvwCoord : SV_DomainLocation, const OutputPatch<InputType, 4> patch)
 {

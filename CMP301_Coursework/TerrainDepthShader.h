@@ -16,11 +16,11 @@ public:
 	TerrainDepthShader(ID3D11Device* device, HWND hwnd);
 	~TerrainDepthShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* heightmap, int tessAmount);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* heightmap, XMINT4 tessValues);
 
 private:
 	struct TesselationBufferType {
-		XMINT4 tesselationAmount;
+		XMINT4 tessDistances;
 		XMMATRIX world;
 		XMMATRIX view;
 	};

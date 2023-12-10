@@ -3,7 +3,7 @@
 
 WaterDepthShader::WaterDepthShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"water_tess_vs.cso", L"water_tess_hs.cso", L"water_tess_ds.cso", L"terraindepth_ps.cso");
+	initShader(L"water_tess_vs.cso", L"tesselation_hs.cso", L"water_tess_ds.cso", L"terraindepth_ps.cso");
 }
 
 WaterDepthShader::~WaterDepthShader()
@@ -84,7 +84,7 @@ void  WaterDepthShader::initShader(const wchar_t* vsFilename, const wchar_t* hsF
 
 }
 
-void  WaterDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, int tessAmount, float time)
+void  WaterDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* heightmap1, ID3D11ShaderResourceView* heightmap2, float time, XMINT4 tessValues)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
@@ -105,7 +105,7 @@ void  WaterDepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, 
 
 	deviceContext->Map(tesselationBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	TesselationBufferType* tessPtr = (TesselationBufferType*)mappedResource.pData;
-	tessPtr->tesselationAmount.x = tessAmount;
+	tessPtr->tessDistances.x =0;
 	tessPtr->world = tworld;
 	tessPtr->view = tview;
 	deviceContext->Unmap(tesselationBuffer, 0);

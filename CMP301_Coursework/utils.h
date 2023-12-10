@@ -1,1 +1,1 @@
-#define LIGHTCOUNT 4
+#define LIGHTCOUNT 7

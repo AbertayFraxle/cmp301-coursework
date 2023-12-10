@@ -21,6 +21,8 @@ struct InputType
 };
 
 
+//cheap and easy shader to convey the drunkness effect I wanted, warps UV co-ordinates of the rendertexture and returns distorted, blurred view
+
 float4 main(InputType input) : SV_TARGET
 {
 	// Sample the pixel color from the texture using the sampler at this texture coordinate location.

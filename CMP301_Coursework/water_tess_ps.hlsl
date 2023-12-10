@@ -28,7 +28,7 @@ struct InputType
     float3 normal : NORMAL;
     float3 worldPosition : TEXCOORD1;
     float4 lightViewPos[LIGHTCOUNT] : TEXCOORD2;
-    float3 viewVector : JEFF;
+    float3 viewVector : VIEWVEC;
 };
 
 // Calculate lighting intensity based on direction and normal. Combine with light colour.
@@ -131,7 +131,7 @@ float4 main(InputType input) : SV_TARGET
             
                     lightColour += calcLight;
             
-                    if (all(calcLight == float4(0, 0, 0, 1)))
+                    if (all(calcLight != float4(0, 0, 0, 1)))
                     {
             
                         specularColour[i] = calcSpecular(-lightVector[i], input.normal, input.viewVector, specular[i], specularPower[i].x);

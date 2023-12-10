@@ -89,6 +89,7 @@ float4 main(InputType input) : SV_TARGET
 	// Sample the texture. Calculate light intensity and colour, return light*texture for final pixel colour.
 	float4 textureColour = texture0.Sample(sampler0, input.tex);
     
+    //if the texture colour is pure white, return colour of emissive light source
     if (all(textureColour == float4(1, 1, 1,1)))
     {
         return float4(1.0f, 0.6f, 0.0f, 1.0f);
@@ -97,53 +98,59 @@ float4 main(InputType input) : SV_TARGET
     
     float3 lightVector[LIGHTCOUNT];
     float4 lightColour = float4(0, 0, 0, 0);
-
-    float4 newNorm =  normal.Sample(sampler0, input.tex);
+    float shadowMapBias = 0.001f;
+    
+    //apply a normal modifier determined by sampling the provided normalmap
+    float4 newNorm = normal.Sample(sampler0, input.tex);
     float3 backup = input.normal;
     
     input.normal = normalize(input.normal + newNorm);
     
+
 	//loop for all the lights in the scene
     for (int i = 0; i < LIGHTCOUNT; i++)
     {
-        float2 pTexCoord = getProjectiveCoords(input.lightViewPos[i]);
-    
-        float shadowMapBias = 0.005f;
         
+        //project point to light view and get tex coords
+        float2 pTexCoord = getProjectiveCoords(input.lightViewPos[i]);
+        
+        //initialise calculated light at point as black
+        float4 calcLight = float4(0, 0, 0, 1);
+        
+         //check if theres depth data for tex coord
         if (hasDepthData(pTexCoord))
         {
        
-            float4 calcLight = float4(0, 0, 0, 1);
+            
+            
                 
             if (!isInShadow(depthMapTexture[i], pTexCoord, input.lightViewPos[i], shadowMapBias))
             {
         
-        
+                 //if not in shadow, light the point
                 float4 calcLight = float4(0, 0, 0, 1);
-		//check if there's a direction, for this week, the only light with a direction will be the directional light
+		//if theres a coneangle, treat as a spotlight
                 if (coneAngle[i].x > 0.f)
                 {
                     float3 rPosition = position[i].xyz;
                     rPosition = mul(rPosition, worldMatrix);
             
 
-            //if no direction, calculate the lighting based on nomal point light calculation and add it to the lightColour vector
+                //get unit vector of direction of light to point
                     lightVector[i] = normalize(rPosition - input.worldPosition);
 
-            //get the distance of the lit point to the light source
+                //get the distance of the lit point to the light source
                     float dist = length(rPosition - input.worldPosition);
 
-            //calculate the attenuation
+                //calculate the attenuation
                     float attenuation = 1 / (factors[i].x + (factors[i].y * dist) + (factors[i].z * pow(dist, 2)));
 
-            
-            
-            //calculate the lighting of the point
-            
+
+                    //if the face direction isn't facing away from the light
                     if (dot(backup.xyz, -lightVector[i].xyz) < 0)
                     {
             
-            
+                        //calculate the lighting of the point
                         calcLight = saturate(calculateLighting(lightVector[i], input.normal, diffuse[i]) * attenuation);
             
             
@@ -155,7 +162,7 @@ float4 main(InputType input) : SV_TARGET
                 }
                 else
                 {
-            //calculate the lighting intensity for the directional light
+                //calculate the lighting intensity for the directional light
                     float intensity = saturate(dot(input.normal, -direction[i].xyz));
                     calcLight += saturate(diffuse[i] * intensity);
             

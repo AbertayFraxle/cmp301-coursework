@@ -15,6 +15,7 @@
 #include "WaterTessellationShader.h"
 #include "SkyShader.h"
 #include "WaterDepthShader.h"
+#include "BottleShader.h"
 
 
 class App1 : public BaseApplication
@@ -55,6 +56,8 @@ private:
 	AModel* shelf;
 	AModel* bottle1;
 	AModel* bottle2;
+	AModel* moai;
+	AModel* coconut;
 
 	RenderTexture* sceneTexture;
 	OrthoMesh* playerView;
@@ -69,11 +72,10 @@ private:
 	WaterTessellationShader* waterTessellationShader;
 	SkyShader* skyShader;
 	WaterDepthShader* waterDepthShader;
+	BottleShader* bottleShader;
 
 	Light* lights[LIGHTCOUNT];
 	ShadowMap* shadowMaps[LIGHTCOUNT];
-
-	ShadowMap* cameraDepth;
 
 	float debuglightPos[3];
 
@@ -82,7 +84,10 @@ private:
 	float doubleVision;
 	float intensity;
 
-	int tessAmount;
+	XMINT4 wTessValues;
+	XMINT4 tTessValues;
+
+	int terTess[4];
 };
 
 #endif

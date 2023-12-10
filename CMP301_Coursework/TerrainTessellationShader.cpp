@@ -4,7 +4,7 @@
 
 TerrainTessellationShader::TerrainTessellationShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"terrain_tess_vs.cso", L"terrain_tess_hs.cso", L"terrain_tess_ds.cso", L"terrain_tess_ps.cso");
+	initShader(L"terrain_tess_vs.cso", L"tesselation_hs.cso", L"terrain_tess_ds.cso", L"terrain_tess_ps.cso");
 }
 
 
@@ -84,7 +84,6 @@ void TerrainTessellationShader::initShader(const wchar_t* vsFilename, const wcha
 	lightBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
 
-
 }
 
 void TerrainTessellationShader::initShader(const wchar_t* vsFilename, const wchar_t* hsFilename, const wchar_t* dsFilename, const wchar_t* psFilename)
@@ -98,7 +97,7 @@ void TerrainTessellationShader::initShader(const wchar_t* vsFilename, const wcha
 }
 
 
-void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, int tessAmount, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* lowNorm, ID3D11ShaderResourceView* highNorm, ID3D11ShaderResourceView* heightmap, ShadowMap* shadowMap[LIGHTCOUNT],Light * lights[LIGHTCOUNT], Camera* camera)
+void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* lowTex, ID3D11ShaderResourceView* highTex, ID3D11ShaderResourceView* lowNorm, ID3D11ShaderResourceView* highNorm, ID3D11ShaderResourceView* heightmap, ShadowMap* shadowMap[LIGHTCOUNT],Light * lights[LIGHTCOUNT],Camera* camera, XMINT4 tessValues)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -118,6 +117,7 @@ void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceC
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
 
+	//pass in the right matrices for the lights to do shadows properly
 	for (int i = 0; i < LIGHTCOUNT; i++) {
 		XMMATRIX tLightViewMatrix = XMMatrixTranspose(lights[i]->getViewMatrix());
 		XMMATRIX tLightProjectionMatrix;
@@ -137,7 +137,7 @@ void TerrainTessellationShader::setShaderParameters(ID3D11DeviceContext* deviceC
 	
 	deviceContext->Map(tesselationBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	TesselationBufferType* tessPtr = (TesselationBufferType*)mappedResource.pData;
-	tessPtr->tesselationAmount.x = tessAmount;
+	tessPtr->tessDistances = tessValues;
 	tessPtr->world = tworld;
 	tessPtr->view = tview;
 	deviceContext->Unmap(tesselationBuffer, 0);

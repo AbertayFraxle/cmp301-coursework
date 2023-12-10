@@ -7,18 +7,6 @@
     <FxCompile Include="shaders\light_vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="terrain_ps.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="terrain_vs.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="water_ps.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="water_vs.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="depth_ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -49,16 +37,10 @@
     <FxCompile Include="terrain_tess_ds.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="terrain_tess_hs.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="terrain_tess_ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="terraindepth_ds.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="terraindepth_hs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="water_tess_vs.hlsl">
@@ -70,13 +52,19 @@
     <FxCompile Include="water_tess_ds.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="water_tess_hs.hlsl">
+    <FxCompile Include="tesselation_hs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="sky_vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="sky_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="bottle_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="bottle_vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
@@ -123,6 +111,9 @@
     <ClCompile Include="TextureShader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="BottleShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -165,6 +156,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="WaterDepthShader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="BottleShader.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
