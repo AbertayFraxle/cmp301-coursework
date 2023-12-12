@@ -1,2 +1,2 @@
-# CMP301_Libraries
-Additional libraries required for CMP301 graphics labs
+# CMP301 Coursework
+Accidentally used this repo while working on this coursework for CMP301
